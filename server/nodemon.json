@@ -1,0 +1,7 @@
+{
+    "verbose": true,
+    "watch": ["src"],
+    "ignore": ["**/*.test.ts", ".git", "node_modules"],
+    "ext": "ts,tsx",
+    "exec": "npm run build:dev && npm run start:current"
+}
