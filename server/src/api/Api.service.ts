@@ -1,3 +1,3 @@
-export function getRoot(): string {
+export function getDummyContent(): string {
     return 'Some dummy content';
 }

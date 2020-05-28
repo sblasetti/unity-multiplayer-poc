@@ -1,7 +1,7 @@
-import { getRoot } from './Api.service';
+import { getDummyContent } from './Api.service';
 
 describe('ApiService', () => {
     it('GET /', () => {
-        expect(getRoot()).toBe('Some dummy content');
+        expect(getDummyContent()).toBe('Some dummy content');
     });
 });
