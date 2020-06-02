@@ -1,10 +1,12 @@
 ﻿using UnityEngine;
 using SocketIO;
+using System;
 
 public class PlayersManagement : MonoBehaviour
 {
     SocketIOComponent socket;
     public GameObject playerPrefab;
+    GameObject localPlayer;
 
     // Start is called before the first frame update
     void Start()
@@ -16,6 +18,19 @@ public class PlayersManagement : MonoBehaviour
         socket.On("player:gone", OnPlayerGone);
 
         Debug.Log("Socket configured");
+    }
+
+    internal GameObject GetLocalPlayer()
+    {
+        if (localPlayer == null)
+            localPlayer = CreatePlayer();
+
+        return localPlayer;
+    }
+
+    private GameObject CreatePlayer()
+    {
+        return Instantiate(playerPrefab);
     }
 
     private SocketIOComponent GetSocket()
@@ -35,7 +50,7 @@ public class PlayersManagement : MonoBehaviour
     void OnPlayerAdded(SocketIOEvent e)
     {
         Debug.Log($"{e.name} - {e.data.GetField("id")}");
-        Instantiate(playerPrefab);
+        CreatePlayer();
     }
 
     void OnPlayerGone(SocketIOEvent e)

@@ -2,6 +2,7 @@
 
 public class Move : MonoBehaviour
 {
+    GameObject localPlayer;
     Rigidbody rb;
 
     public float force = 50f;
@@ -11,14 +12,17 @@ public class Move : MonoBehaviour
 
     void Start()
     {
-        direction = this.transform.forward;
-        rb = this.GetComponent<Rigidbody>();
-        Debug.Log(this.transform.forward);
-        Debug.Log(this.transform.up);
-        Debug.Log(this.transform.right);
+        var playersMgmt = this.GetComponent<PlayersManagement>();
+        localPlayer = playersMgmt.GetLocalPlayer();
+        direction = localPlayer.transform.forward;
+        rb = localPlayer.GetComponent<Rigidbody>();
+        Debug.Log(localPlayer.transform.forward);
+        Debug.Log(localPlayer.transform.up);
+        Debug.Log(localPlayer.transform.right);
     }
 
-    void Update() {
+    void Update()
+    {
         var horizontal = Input.GetAxis("Horizontal");
         var vertical = Input.GetAxis("Vertical");
         direction = new Vector3(horizontal, 0, vertical);
@@ -31,16 +35,17 @@ public class Move : MonoBehaviour
 
         #region Using physics (Rigidbody)
 
-        if (vertical != 0) {
+        if (vertical != 0)
+        {
             var v = vertical * force * Time.deltaTime;
-            // rb.AddForce(this.transform.forward * v, forceMode);
-            // rb.velocity = this.transform.forward * vertical * force;
-            rb.MovePosition(this.transform.position + (this.transform.forward * v));
+            // rb.AddForce(localPlayer.transform.forward * v, forceMode);
+            // rb.velocity = localPlayer.transform.forward * vertical * force;
+            rb.MovePosition(localPlayer.transform.position + (localPlayer.transform.forward * v));
         }
 
         // if (horizontal != 0) {
         //     var h = horizontal * rotationSpeed * Time.deltaTime;
-        //     rb.AddTorque(this.transform.up * h);
+        //     rb.AddTorque(localPlayer.transform.up * h);
         // }
 
         #endregion
@@ -49,17 +54,18 @@ public class Move : MonoBehaviour
 
         // if (vertical != 0) {
         //     var v = vertical * force * Time.deltaTime;
-        //     this.transform.Translate(Vector3.forward * v);
+        //     localPlayer.transform.Translate(Vector3.forward * v);
         // }
 
-        if (horizontal != 0) {
+        if (horizontal != 0)
+        {
             var h = horizontal * rotationSpeed * Time.deltaTime;
-            this.transform.Rotate(Vector3.up, h);
+            localPlayer.transform.Rotate(Vector3.up, h);
         }
 
         #endregion
 
-        Debug.DrawRay(this.transform.position, this.transform.forward, Color.red);
+        Debug.DrawRay(localPlayer.transform.position, localPlayer.transform.forward, Color.red);
 
     }
 }

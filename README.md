@@ -16,3 +16,7 @@ PoC to test building a multiplayer 3D game.
 ### Unity + Socket.IO
 
 - [Pluralsight multiplayer game tutorial](https://app.pluralsight.com/library/courses/unity-multiplayer-game-dev-node-2454/table-of-contents)
+
+### Multiplayer Network Movement
+
+- https://www.youtube.com/watch?v=Glm0nJ4sO5E
