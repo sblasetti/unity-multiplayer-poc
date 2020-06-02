@@ -8,21 +8,16 @@ namespace Tests
 {
     public class TestSuite
     {
-        // A Test behaves as an ordinary method
-        [Test]
-        public void TestSuiteSimplePasses()
-        {
-            // Use the Assert class to test conditions
-        }
-
         // A UnityTest behaves like a coroutine in Play Mode. In Edit Mode you can use
         // `yield return null;` to skip a frame.
         [UnityTest]
-        public IEnumerator TestSuiteWithEnumeratorPasses()
+        public IEnumerator PlayerPrefab_HasNetworkMove()
         {
-            // Use the Assert class to test conditions.
-            // Use yield to skip a frame.
-            yield return null;
+            var player = MonoBehaviour.Instantiate(Resources.Load<GameObject>("Prefabs/Player"));
+            var networkMove = player.GetComponent<NetworkMove>();
+            yield return new WaitForSeconds(0.1f);
+            Assert.IsNotNull(networkMove);
+            Object.Destroy(player.gameObject);
         }
     }
 }
