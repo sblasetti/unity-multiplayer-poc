@@ -1,21 +1,24 @@
 ﻿using UnityEngine;
 using SocketIO;
 using System;
+using System.Collections.Generic;
 
 public class PlayersManagement : MonoBehaviour
 {
     SocketIOComponent socket;
     public GameObject playerPrefab;
     GameObject localPlayer;
+    Dictionary<string, GameObject> remotePlayers = new Dictionary<string, GameObject>();
 
     // Start is called before the first frame update
     void Start()
     {
         socket = GetSocket();
 
-        socket.On("open", OnConnectionOpen);
-        socket.On("player:new", OnPlayerAdded);
-        socket.On("player:gone", OnPlayerGone);
+        socket.On(SocketEvents.SocketOpen, OnConnectionOpen);
+        socket.On(SocketEvents.PlayerNew, OnPlayerAdded);
+        socket.On(SocketEvents.PlayerGone, OnPlayerGone);
+        socket.On(SocketEvents.PlayerOtherPlayers, OnOtherPlayersReceived);
 
         Debug.Log("Socket configured");
     }
@@ -23,14 +26,16 @@ public class PlayersManagement : MonoBehaviour
     internal GameObject GetLocalPlayer()
     {
         if (localPlayer == null)
-            localPlayer = CreatePlayer();
+            localPlayer = CreatePlayer("local");
 
         return localPlayer;
     }
 
-    private GameObject CreatePlayer()
+    private GameObject CreatePlayer(string id)
     {
-        return Instantiate(playerPrefab);
+        var gobj = Instantiate(playerPrefab);
+        gobj.name = $"Player:{id}"; // TODO: improve
+        return gobj;
     }
 
     private SocketIOComponent GetSocket()
@@ -49,12 +54,38 @@ public class PlayersManagement : MonoBehaviour
 
     void OnPlayerAdded(SocketIOEvent e)
     {
-        Debug.Log($"{e.name} - {e.data.GetField("id")}");
-        CreatePlayer();
+        var playerId = e.data.GetField("id").str;
+        Debug.Log($"{e.name} - {playerId}");
+        var player = CreatePlayer(playerId);
+        remotePlayers.Add(playerId, player);
     }
 
     void OnPlayerGone(SocketIOEvent e)
     {
-        Debug.Log($"{e.name} - {e.data.GetField("id")}");
+        var playerId = e.data.GetField("id").str;
+        Debug.Log($"{e.name} - {playerId}");
+
+        var name = $"Player:{playerId}"; // TODO: improve
+        var player = GameObject.Find(name);
+        if (player != null)
+        {
+            Destroy(player);
+            remotePlayers.Remove(playerId);
+        }
+    }
+
+    void OnOtherPlayersReceived(SocketIOEvent e)
+    {
+        var data = e.data.GetField("players");
+        Debug.Log($"{e.name} - {data}");
+
+        var players = data.list;
+        foreach (var player in players)
+        {
+            var playerId = e.data.GetField("id").str;
+            var playerObject = CreatePlayer(playerId);
+            remotePlayers.Add(playerId, playerObject);
+            Debug.Log($"Added remote player {playerId}");
+        }
     }
 }

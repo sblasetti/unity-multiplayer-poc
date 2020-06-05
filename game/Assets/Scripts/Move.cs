@@ -26,6 +26,12 @@ public class Move : MonoBehaviour
         var horizontal = Input.GetAxis("Horizontal");
         var vertical = Input.GetAxis("Vertical");
         direction = new Vector3(horizontal, 0, vertical);
+
+        // TODO: this is a temp way to reset player's position, remove
+        if (Input.GetKeyUp(KeyCode.R))
+        {
+            localPlayer.transform.SetPositionAndRotation(Vector3.up, new Quaternion(0, 0, 0, 0));
+        }
     }
 
     void FixedUpdate()
