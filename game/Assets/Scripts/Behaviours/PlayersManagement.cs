@@ -3,8 +3,14 @@ using SocketIO;
 
 public class PlayersManagement : MonoBehaviour
 {
+    public GameObject playerPrefab;
     SocketIOComponent socket;
-    PlayersManagementController controller = new PlayersManagementController(new UnityProxy());
+    PlayersManagementController controller = new PlayersManagementController(new RealUnityObjectProxy(), new RealUnityDebugProxy());
+
+    void OnEnable()
+    {
+        controller.SetPlayerPrefab(playerPrefab);
+    }
 
     // Start is called before the first frame update
     void Start()
@@ -22,6 +28,11 @@ public class PlayersManagement : MonoBehaviour
         socket.On(SocketEvents.PlayerOtherPlayers, controller.OnOtherPlayersReceived);
 
         Debug.Log("Socket configured");
+    }
+
+    public GameObject GetLocalPlayer()
+    {
+        return controller.GetLocalPlayer();
     }
 
     private SocketIOComponent GetSocket()

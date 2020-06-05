@@ -1,11 +1,11 @@
 using UnityEngine;
 
-public interface IUnityProxy
+public interface IUnityObjectProxy
 {
-    GameObject Instantiate(GameObject playerPrefab);
-    void Destroy(GameObject player);
+    GameObject Instantiate(GameObject gameObject);
+    void Destroy(GameObject gameObject);
 }
-public class UnityProxy : IUnityProxy
+public class RealUnityObjectProxy : IUnityObjectProxy
 {
     public void Destroy(GameObject gameObject)
     {
@@ -15,5 +15,10 @@ public class UnityProxy : IUnityProxy
     public GameObject Instantiate(GameObject gameObject)
     {
         return UnityEngine.Object.Instantiate(gameObject);
+    }
+
+    public void Log(string str)
+    {
+        Debug.Log(str);
     }
 }

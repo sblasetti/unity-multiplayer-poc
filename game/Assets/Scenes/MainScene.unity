@@ -1358,8 +1358,8 @@ GameObject:
   m_Component:
   - component: {fileID: 1213127873}
   - component: {fileID: 1213127872}
-  - component: {fileID: 1213127874}
   - component: {fileID: 1213127875}
+  - component: {fileID: 1213127874}
   m_Layer: 0
   m_Name: Game
   m_TagString: Untagged
@@ -1408,11 +1408,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 1213127871}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 061f4c7c1e87b1548a647d7918817d5d, type: 3}
+  m_Script: {fileID: 11500000, guid: 5413aa7dc1a377f49b11eba4c8bc7f34, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerPrefab: {fileID: 7957902087708686377, guid: cf6ebc3c0968d4a498bc1cb72e394923,
-    type: 3}
+  force: 10
+  rotationSpeed: 100
+  forceMode: 0
 --- !u!114 &1213127875
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1422,12 +1423,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 1213127871}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fa2aaddfad4da57459eb0e2c12944a53, type: 3}
+  m_Script: {fileID: 11500000, guid: 18a811c313942b94bb1cfe463efb8f9e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  force: 10
-  rotationSpeed: 100
-  forceMode: 0
+  playerPrefab: {fileID: 7957902087708686377, guid: cf6ebc3c0968d4a498bc1cb72e394923,
+    type: 3}
 --- !u!1 &1257118368
 GameObject:
   m_ObjectHideFlags: 0
