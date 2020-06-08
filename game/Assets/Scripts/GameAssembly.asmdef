@@ -1,7 +1,8 @@
 {
     "name": "GameAssembly",
     "references": [
-        "GUID:c933a22381cc9de41ab779fc9e7a28af"
+        "GUID:c933a22381cc9de41ab779fc9e7a28af",
+        "GUID:0d8beb7f090555447a6cf5ce9e54dbb4"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

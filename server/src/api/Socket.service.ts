@@ -26,6 +26,15 @@ export function OnPlayerDataReceived(socket: SocketIO.Socket): void {
     logMessage('player useful data received', socket);
 }
 
+export function OnLocalPlayerMovement(socket: SocketIO.Socket, data: Position & Movement): void {
+    logMessage('player local move ' + JSON.stringify(data), socket);
+    socket.broadcast.emit(SOCKET_EVENTS.Player.RemoteMove, {
+        id: socket.id,
+        horizontal: data.horizontalMovement,
+        vertical: data.verticalMovement,
+    });
+}
+
 export function OnSocketDisconnection(socket: SocketIO.Socket): void {
     apiService.removePlayer(socket.id);
     socket.broadcast.emit(SOCKET_EVENTS.Player.Gone, { id: socket.id });

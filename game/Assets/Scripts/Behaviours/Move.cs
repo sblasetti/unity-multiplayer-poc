@@ -16,9 +16,9 @@ public class Move : MonoBehaviour
         localPlayer = playersMgmt.GetLocalPlayer();
         direction = localPlayer.transform.forward;
         rb = localPlayer.GetComponent<Rigidbody>();
-        Debug.Log(localPlayer.transform.forward);
-        Debug.Log(localPlayer.transform.up);
-        Debug.Log(localPlayer.transform.right);
+        Debug.Log($"forward: {localPlayer.transform.forward}");
+        Debug.Log($"up: {localPlayer.transform.up}");
+        Debug.Log($"right: {localPlayer.transform.right}");
     }
 
     void Update()
@@ -73,5 +73,12 @@ public class Move : MonoBehaviour
 
         Debug.DrawRay(localPlayer.transform.position, localPlayer.transform.forward, Color.red);
 
+        if (horizontal == 0 && vertical == 0)
+            return;
+
+        Debug.Log("send movement over network");
+
+        var playersMgmt = this.GetComponent<PlayersManagement>();
+        playersMgmt.SendPlayerMove(localPlayer.transform.position, horizontal, vertical);
     }
 }

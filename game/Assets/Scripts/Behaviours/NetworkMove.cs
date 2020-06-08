@@ -19,6 +19,6 @@ public class NetworkMove : MonoBehaviour
         if (horizontal == 0 && vertical == 0)
             return;
 
-        Debug.Log("send movement over network");
+        // Debug.Log("send movement over network");
     }
 }

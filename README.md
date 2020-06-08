@@ -12,6 +12,7 @@ PoC to test building a multiplayer 3D game.
 ### Physics
 
 - [Movement: Rigidbody vs Translate](https://www.youtube.com/watch?v=ixM2W2tPn6c)
+- [Troubleshooting: character falling over problem](https://forum.unity.com/threads/character-falling-over-problem.160027/)
 
 ### Unity + Socket.IO
 

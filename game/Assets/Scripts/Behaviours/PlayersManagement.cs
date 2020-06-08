@@ -1,21 +1,31 @@
 ﻿using UnityEngine;
 using SocketIO;
+using System;
+using Zenject;
 
 public class PlayersManagement : MonoBehaviour
 {
     public GameObject playerPrefab;
     SocketIOComponent socket;
-    PlayersManagementController controller = new PlayersManagementController(new RealUnityObjectProxy(), new RealUnityDebugProxy());
+
+    IPlayersManagementController controller;
 
     void OnEnable()
     {
         controller.SetPlayerPrefab(playerPrefab);
+        controller.SetSocket(GetSocket());
     }
 
     // Start is called before the first frame update
     void Start()
     {
         SetupSocketEventListeners();
+    }
+
+    [Inject]
+    private void Init(IPlayersManagementController controller)
+    {
+        this.controller = controller;
     }
 
     private void SetupSocketEventListeners()
@@ -26,8 +36,17 @@ public class PlayersManagement : MonoBehaviour
         socket.On(SocketEvents.PlayerNew, controller.OnPlayerAdded);
         socket.On(SocketEvents.PlayerGone, controller.OnPlayerGone);
         socket.On(SocketEvents.PlayerOtherPlayers, controller.OnOtherPlayersReceived);
+        socket.On(SocketEvents.PlayerRemoteMove, controller.OnRemotePlayerMovement);
 
         Debug.Log("Socket configured");
+    }
+
+    private SocketIOComponent GetSocket()
+    {
+        if (socket == null)
+            socket = GetComponent<SocketIOComponent>();
+        return socket;
+
     }
 
     public GameObject GetLocalPlayer()
@@ -35,11 +54,8 @@ public class PlayersManagement : MonoBehaviour
         return controller.GetLocalPlayer();
     }
 
-    private SocketIOComponent GetSocket()
+    internal void SendPlayerMove(Vector3 position, float horizontal, float vertical)
     {
-        if (socket == null)
-            socket = GetComponent<SocketIOComponent>();
-
-        return socket;
+        controller.SendPlayerMove(position.x, position.y, horizontal, vertical);
     }
 }

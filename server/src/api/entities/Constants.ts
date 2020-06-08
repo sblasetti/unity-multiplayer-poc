@@ -8,5 +8,7 @@ export const SOCKET_EVENTS = {
         Gone: 'player:gone',
         Data: 'player:data',
         OtherPlayers: 'player:other-players',
+        LocalMove: 'player:local-movement',
+        RemoteMove: 'player:remote-movement',
     },
 };
