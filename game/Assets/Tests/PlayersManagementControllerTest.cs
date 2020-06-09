@@ -1,22 +1,24 @@
 using NUnit.Framework;
-using SocketIO;
+using Zenject;
 
-namespace Tests
+[TestFixture]
+public class PlayersManagementControllerTest : ZenjectUnitTestFixture
 {
-    public class PlayersManagementControllerTest
+    private IPlayersManagementController controller;
+    // private Mock<IUnityObjectProxy> unityObjectProxy;
+    // private Mock<IUnityDebugProxy> unityDebugProxy;
+
+    [SetUp]
+    public void Init()
     {
-        [Test]
-        public void OnPlayerAdded_CreatesPlayer()
-        {
-            var fakeObject = new FakeUnityObjectProxy();
-            var fakeDebug = new FakeUnityDebugProxy();
-            var component = new PlayersManagementController(fakeObject, fakeDebug);
-            var e = new SocketIOEvent("test", new JSONObject("data"));
+        // unityDebugProxy = null;
+    }
 
-            component.OnPlayerAdded(e);
-
-            // assert remote player created
-            // player added to the list of remotes
-        }
+    [Test]
+    public void RunTest1()
+    {
+        // Given
+        // When
+        // Then
     }
 }

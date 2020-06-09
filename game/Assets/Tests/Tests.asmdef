@@ -4,13 +4,15 @@
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
         "GameAssembly",
-        "SocketIO"
+        "SocketIO",
+        "Zenject-TestFramework"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": true,
     "precompiledReferences": [
+        "Moq.dll",
         "nunit.framework.dll"
     ],
     "autoReferenced": false,
