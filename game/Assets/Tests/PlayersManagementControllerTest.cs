@@ -1,24 +1,30 @@
 using NUnit.Framework;
 using Zenject;
+using Moq;
 
-[TestFixture]
-public class PlayersManagementControllerTest : ZenjectUnitTestFixture
+namespace Tests
 {
-    private IPlayersManagementController controller;
-    // private Mock<IUnityObjectProxy> unityObjectProxy;
-    // private Mock<IUnityDebugProxy> unityDebugProxy;
-
-    [SetUp]
-    public void Init()
+    [TestFixture]
+    public class PlayersManagementControllerTest : ZenjectUnitTestFixture
     {
-        // unityDebugProxy = null;
+        private IPlayersManagementController controller;
+        private Mock<IUnityObjectProxy> unityObjectProxy = new Mock<IUnityObjectProxy>();
+        private Mock<IUnityDebugProxy> unityDebugProxy = new Mock<IUnityDebugProxy>();
+
+        [SetUp]
+        public void Init()
+        {
+            controller = new PlayersManagementController(unityObjectProxy.Object, unityDebugProxy.Object);
+        }
+
+        [Test]
+        public void RunTest1()
+        {
+            // Given
+            // When
+            // Then
+            Assert.AreEqual(1, 1);
+        }
     }
 
-    [Test]
-    public void RunTest1()
-    {
-        // Given
-        // When
-        // Then
-    }
 }
