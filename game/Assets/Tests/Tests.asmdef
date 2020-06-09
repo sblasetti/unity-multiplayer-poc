@@ -4,6 +4,8 @@
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
         "GameAssembly",
+        "SocketIO",
+        "Zenject",
         "Zenject-TestFramework"
     ],
     "includePlatforms": [
