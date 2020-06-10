@@ -92,12 +92,42 @@ namespace Tests
             AssertRemotePlayerDoesNotExist("TEST_ID");
         }
 
+        [Test]
+        public void OnOtherPlayersReceived_ShouldAddRemotePlayers()
+        {
+            // Given
+            AssertPlayersCountIs(0);
+            var players = new List<JSONObject> {
+                BuildJSONObjectWithPlayerId("1"),
+                BuildJSONObjectWithPlayerId("2"),
+                BuildJSONObjectWithPlayerId("3"),
+            };
+            var listObj = new JSONObject(JSONObject.Type.ARRAY);
+            listObj.list = players;
+            var jobj = new JSONObject(new Dictionary<string, JSONObject> { { "players", listObj } });
+            var socketEvent = ObjectMother.BuildSocketIOEvent("test", jobj);
+            var data = socketEvent.data.GetField("players");
+
+            // When
+            controller.OnOtherPlayersReceived(socketEvent);
+
+            // Then
+            // TODO: improve assertions
+            AssertPlayersCountIs(players.Count);
+        }
+
         private static SocketIOEvent BuildSocketIOEventWithPlayerId(string eventName, string playerId)
+        {
+            var jobj = BuildJSONObjectWithPlayerId(playerId);
+            var socketEvent = ObjectMother.BuildSocketIOEvent(eventName, jobj);
+            return socketEvent;
+        }
+
+        private static JSONObject BuildJSONObjectWithPlayerId(string playerId)
         {
             var jobj = ObjectMother.BuildEmptyJSONObject();
             jobj.AddField("id", playerId);
-            var socketEvent = ObjectMother.BuildSocketIOEvent(eventName, jobj);
-            return socketEvent;
+            return jobj;
         }
 
         private void AssertRemotePlayerExists(string id)
