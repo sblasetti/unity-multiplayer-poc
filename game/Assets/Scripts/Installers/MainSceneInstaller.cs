@@ -1,4 +1,6 @@
+using SocketIO;
 using UnityEngine;
+using UnityEngine.Assertions;
 using Zenject;
 
 public class MainSceneInstaller : MonoInstaller<MainSceneInstaller>
@@ -7,6 +9,9 @@ public class MainSceneInstaller : MonoInstaller<MainSceneInstaller>
     {
         Container.Bind<IUnityObjectProxy>().To<RealUnityObjectProxy>().AsSingle();
         Container.Bind<IUnityDebugProxy>().To<RealUnityDebugProxy>().AsSingle();
+        // var instance = GetComponent<Game>();
+        // Assert.IsNotNull(instance);
+        // Container.Bind<ISocketIOComponent>().FromInstance(instance).AsSingle();
         Container.Bind<IPlayersManagementController>().To<PlayersManagementController>().AsSingle();
     }
 }

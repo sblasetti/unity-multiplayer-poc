@@ -5,6 +5,7 @@ using UnityEngine;
 public static class SocketEvents
 {
     public static string PlayerNew = "player:new";
+    public static string PlayerSendData = "player:data";
     public static string PlayerGone = "player:gone";
     public static string PlayerOtherPlayers = "player:other-players";
     public static string PlayerRemoteMove = "player:remote-movement";

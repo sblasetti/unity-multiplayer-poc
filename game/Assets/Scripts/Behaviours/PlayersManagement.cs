@@ -8,6 +8,7 @@ public class PlayersManagement : MonoBehaviour
     public GameObject playerPrefab;
     SocketIOComponent socket;
 
+    [Inject]
     IPlayersManagementController controller;
 
     void OnEnable()
@@ -20,12 +21,6 @@ public class PlayersManagement : MonoBehaviour
     void Start()
     {
         SetupSocketEventListeners();
-    }
-
-    [Inject]
-    private void Init(IPlayersManagementController controller)
-    {
-        this.controller = controller;
     }
 
     private void SetupSocketEventListeners()

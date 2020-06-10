@@ -5,6 +5,7 @@ using UnityEngine;
 
 public interface IPlayersManagementController
 {
+    int PlayersCount { get; }
     GameObject GetLocalPlayer();
     GameObject GetRemotePlayer(string id);
     void OnConnectionOpen(SocketIOEvent e);
@@ -13,7 +14,7 @@ public interface IPlayersManagementController
     void OnPlayerGone(SocketIOEvent e);
     void OnRemotePlayerMovement(SocketIOEvent e);
     void SetPlayerPrefab(GameObject playerPrefab);
-    void SetSocket(SocketIOComponent socket);
+    void SetSocket(ISocketIOComponent socket);
     void SendPlayerMove(float initialX, float initialY, float horizontal, float vertical);
 }
 
@@ -31,8 +32,8 @@ public class PlayersManagementController : IPlayersManagementController
         this.playerPrefab = playerPrefab;
     }
 
-    SocketIOComponent socket;
-    public void SetSocket(SocketIOComponent socket)
+    ISocketIOComponent socket;
+    public void SetSocket(ISocketIOComponent socket)
     {
         this.socket = socket;
     }
@@ -41,6 +42,8 @@ public class PlayersManagementController : IPlayersManagementController
     Dictionary<string, GameObject> remotePlayers = new Dictionary<string, GameObject>();
     IUnityObjectProxy unityObjectProxy;
     IUnityDebugProxy unityDebugProxy;
+
+    public int PlayersCount => remotePlayers.Count + (localPlayer != null ? 1 : 0);
 
     public GameObject GetLocalPlayer()
     {

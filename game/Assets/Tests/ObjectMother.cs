@@ -1,6 +1,7 @@
 using UnityEngine;
 using SocketIO;
 using System.Collections.Generic;
+using System;
 
 namespace Tests
 {
@@ -11,10 +12,14 @@ namespace Tests
             return new GameObject();
         }
 
-        public static JSONObject BuildGenericJSONObject()
+        public static JSONObject BuildEmptyJSONObject()
         {
-            return new JSONObject(new Dictionary<string, string>() { { "id", "value1" } });
+            return new JSONObject(new Dictionary<string, string>());
         }
 
+        internal static SocketIOEvent BuildSocketIOEvent(string name, JSONObject jobj)
+        {
+            return new SocketIO.SocketIOEvent(name, jobj);
+        }
     }
 }

@@ -3,6 +3,7 @@ using Zenject;
 using Moq;
 using System.Collections.Generic;
 using UnityEngine;
+using SocketIO;
 
 namespace Tests
 {
@@ -25,26 +26,50 @@ namespace Tests
         */
 
         [SetUp]
-        public void Init()
+        public void SetUp()
         {
-            controller = new PlayersManagementController(unityObjectProxyMock.Object, unityDebugProxyMock.Object);
+            unityDebugProxyMock.Reset();
+            unityObjectProxyMock.Reset();
+            controller = new PlayersManagementController(
+                unityObjectProxyMock.Object, unityDebugProxyMock.Object);
 
             unityObjectProxyMock.Setup(x => x.Instantiate(It.IsAny<GameObject>())).Returns(ObjectMother.BuildGenericGameObject());
         }
 
         [Test]
-        public void OnPlayerAdded_TBD()
+        public void OnConnectionOpen_ShouldSendPlayerDataToTheServer()
         {
             // Given
-            var socketEvent = new SocketIO.SocketIOEvent("test", ObjectMother.BuildGenericJSONObject());
+            var socketMock = new Mock<ISocketIOComponent>();
+            controller.SetSocket(socketMock.Object);
+
+            // When
+            var socketEvent = ObjectMother.BuildSocketIOEvent("test", ObjectMother.BuildEmptyJSONObject());
+            controller.OnConnectionOpen(socketEvent);
+
+            // Then
+            socketMock.Verify(x => x.Emit(SocketEvents.PlayerSendData), Times.Once);
+        }
+
+        [Test]
+        public void OnPlayerAdded_PlayerIsCreatedLocallyAndAddedToTheListOfRemotePlayers()
+        {
+            // Given
+            Assert.AreEqual(controller.PlayersCount, 0);
+            var jobj = ObjectMother.BuildEmptyJSONObject();
+            jobj.AddField("id", "TEST_ID");
+            var socketEvent = ObjectMother.BuildSocketIOEvent("test", jobj);
 
             // When
             controller.OnPlayerAdded(socketEvent);
 
-            // Then
+            // Then: assert remote player created as local GameObject
+            unityObjectProxyMock.Verify(x => x.Instantiate(It.IsAny<GameObject>()), Times.Once);
+            // Then: player added to the list of remotes
+            Assert.AreEqual(controller.PlayersCount, 1);
+            var player = controller.GetRemotePlayer("TEST_ID");
+            Assert.IsNotNull(player);
             unityDebugProxyMock.Verify(x => x.Log(It.IsAny<string>()), Times.Once);
-            // assert remote player created
-            // player added to the list of remotes
         }
     }
 
