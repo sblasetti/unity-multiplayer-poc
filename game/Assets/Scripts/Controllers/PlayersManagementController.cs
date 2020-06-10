@@ -20,8 +20,9 @@ public interface IPlayersManagementController
 
 public class PlayersManagementController : IPlayersManagementController
 {
-    public PlayersManagementController(IUnityObjectProxy unityObjectProxy, IUnityDebugProxy unityDebugProxy)
+    public PlayersManagementController(IUnityGameObjectProxy unityGameObjectProxy, IUnityObjectProxy unityObjectProxy, IUnityDebugProxy unityDebugProxy)
     {
+        this.unityGameObjectProxy = unityGameObjectProxy;
         this.unityObjectProxy = unityObjectProxy;
         this.unityDebugProxy = unityDebugProxy;
     }
@@ -40,6 +41,7 @@ public class PlayersManagementController : IPlayersManagementController
 
     GameObject localPlayer;
     Dictionary<string, GameObject> remotePlayers = new Dictionary<string, GameObject>();
+    IUnityGameObjectProxy unityGameObjectProxy;
     IUnityObjectProxy unityObjectProxy;
     IUnityDebugProxy unityDebugProxy;
 
@@ -61,7 +63,7 @@ public class PlayersManagementController : IPlayersManagementController
     public void OnConnectionOpen(SocketIOEvent e)
     {
         unityDebugProxy.Log("connected");
-        socket.Emit("player:data");
+        socket.Emit(SocketEvents.PlayerData);
     }
 
     public void OnPlayerAdded(SocketIOEvent e)
@@ -154,7 +156,7 @@ public class PlayersManagementController : IPlayersManagementController
     private void RemoveRemotePlayer(string playerId)
     {
         var name = $"Player:{playerId}"; // TODO: improve
-        var player = GameObject.Find(name);
+        var player = unityGameObjectProxy.Find(name);
         if (player != null)
         {
             unityObjectProxy.Destroy(player);
