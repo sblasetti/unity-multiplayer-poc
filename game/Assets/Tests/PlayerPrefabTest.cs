@@ -14,7 +14,7 @@ namespace Tests
         public IEnumerator PlayerPrefab_HasNetworkMove()
         {
             var player = MonoBehaviour.Instantiate(Resources.Load<GameObject>("Prefabs/Player"));
-            var networkMove = player.GetComponent<NetworkMove>();
+            var networkMove = player.GetComponent<RemoteMovement>();
             yield return new WaitForSeconds(0.1f);
             Assert.IsNotNull(networkMove);
             Object.Destroy(player.gameObject);

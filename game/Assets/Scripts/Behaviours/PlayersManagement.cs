@@ -14,15 +14,8 @@ public class PlayersManagement : MonoBehaviour
 
     void OnEnable()
     {
+        socket = GetComponent<SocketIOComponent>();
         PassObjectsToController();
-    }
-
-    private void PassObjectsToController()
-    {
-        // Is this the best way to use Unity related objects?
-        controller.SetPlayerPrefab(playerPrefab);
-        controller.SetSocket(GetSocket());
-        controller.SetState(State);
     }
 
     // Start is called before the first frame update
@@ -31,25 +24,22 @@ public class PlayersManagement : MonoBehaviour
         SetupSocketEventListeners();
     }
 
+    private void PassObjectsToController()
+    {
+        // Is this the best way to use Unity related objects?
+        controller.SetPlayerPrefab(playerPrefab);
+        controller.SetSocket(socket);
+        controller.SetState(State);
+    }
+
     private void SetupSocketEventListeners()
     {
-        socket = GetSocket();
-
         socket.On(SocketEvents.SocketOpen, controller.OnConnectionOpen);
         socket.On(SocketEvents.PlayerNew, controller.OnPlayerAdded);
         socket.On(SocketEvents.PlayerGone, controller.OnPlayerGone);
         socket.On(SocketEvents.PlayerOtherPlayers, controller.OnOtherPlayersReceived);
-        socket.On(SocketEvents.PlayerRemoteMove, controller.OnRemotePlayerMovement);
 
         Debug.Log("Socket configured");
-    }
-
-    private SocketIOComponent GetSocket()
-    {
-        if (socket == null)
-            socket = GetComponent<SocketIOComponent>();
-        return socket;
-
     }
 
     public GameObject GetLocalPlayer()

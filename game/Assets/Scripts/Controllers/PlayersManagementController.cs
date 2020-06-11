@@ -11,7 +11,6 @@ public interface IPlayersManagementController
     void OnOtherPlayersReceived(SocketIOEvent e);
     void OnPlayerAdded(SocketIOEvent e);
     void OnPlayerGone(SocketIOEvent e);
-    void OnRemotePlayerMovement(SocketIOEvent e);
     void SetState(IGameState state);
     void SetPlayerPrefab(GameObject playerPrefab);
     void SetSocket(ISocketIOComponent socket);
@@ -50,7 +49,6 @@ public class PlayersManagementController : IPlayersManagementController
     #endregion
 
     GameObject localPlayer;
-    Dictionary<string, GameObject> remotePlayers = new Dictionary<string, GameObject>();
     IUnityGameObjectProxy unityGameObjectProxy;
     IUnityObjectProxy unityObjectProxy;
     IUnityDebugProxy unityDebugProxy;
@@ -63,10 +61,8 @@ public class PlayersManagementController : IPlayersManagementController
     }
     public GameObject GetRemotePlayer(string id)
     {
-        if (!remotePlayers.ContainsKey(id))
-            return null; // TODO: error?
-
-        return remotePlayers[id];
+        var name = $"Player:{id}"; // TODO: improve
+        return unityGameObjectProxy.Find(name);
     }
 
     public void OnConnectionOpen(SocketIOEvent e)
@@ -124,31 +120,6 @@ public class PlayersManagementController : IPlayersManagementController
         }
     }
 
-    public void OnRemotePlayerMovement(SocketIOEvent e)
-    {
-        var playerId = GetString(e, "id");
-        var player = GetRemotePlayer(playerId);
-
-        var horizontal = GetFloat(e, "horizontal");
-        var vertical = GetFloat(e, "vertical");
-
-        unityDebugProxy.Log($"id: {playerId} | h: {horizontal} | v: {vertical}");
-
-        if (vertical.HasValue && vertical != 0)
-        {
-            var v = vertical.Value * 10f * Time.deltaTime;
-            // rb.AddForce(localPlayer.transform.forward * v, forceMode);
-            // rb.velocity = localPlayer.transform.forward * vertical * force;
-            var rb = player.GetComponent<Rigidbody>();
-            rb.MovePosition(player.transform.position + (player.transform.forward * v));
-        }
-        if (horizontal.HasValue && horizontal != 0)
-        {
-            var h = horizontal.Value * 100f * Time.deltaTime;
-            player.transform.Rotate(Vector3.up, h);
-        }
-    }
-
     private GameObject CreatePlayer(string id)
     {
         var gobj = unityObjectProxy.Instantiate(playerPrefab);
@@ -172,15 +143,5 @@ public class PlayersManagementController : IPlayersManagementController
         {
             unityObjectProxy.Destroy(player);
         }
-    }
-
-    private string GetString(SocketIO.SocketIOEvent e, string field)
-    {
-        return e.data.HasField(field) ? e.data.GetField(field).str : null;
-    }
-
-    private float? GetFloat(SocketIO.SocketIOEvent e, string field)
-    {
-        return e.data.HasField(field) ? float.Parse(e.data.GetField(field).str) : (float?)null;
     }
 }
