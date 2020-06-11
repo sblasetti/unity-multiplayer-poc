@@ -5,7 +5,6 @@ using UnityEngine;
 
 public interface IPlayersManagementController
 {
-    int PlayersCount { get; }
     GameObject GetLocalPlayer();
     GameObject GetRemotePlayer(string id);
     void OnConnectionOpen(SocketIOEvent e);
@@ -13,6 +12,7 @@ public interface IPlayersManagementController
     void OnPlayerAdded(SocketIOEvent e);
     void OnPlayerGone(SocketIOEvent e);
     void OnRemotePlayerMovement(SocketIOEvent e);
+    void SetState(IGameState state);
     void SetPlayerPrefab(GameObject playerPrefab);
     void SetSocket(ISocketIOComponent socket);
     void SendPlayerMove(float initialX, float initialY, float horizontal, float vertical);
@@ -27,6 +27,8 @@ public class PlayersManagementController : IPlayersManagementController
         this.unityDebugProxy = unityDebugProxy;
     }
 
+    #region Unity objects
+
     GameObject playerPrefab;
     public void SetPlayerPrefab(GameObject playerPrefab)
     {
@@ -39,13 +41,19 @@ public class PlayersManagementController : IPlayersManagementController
         this.socket = socket;
     }
 
+    IGameState state;
+    public void SetState(IGameState state)
+    {
+        this.state = state;
+    }
+
+    #endregion
+
     GameObject localPlayer;
     Dictionary<string, GameObject> remotePlayers = new Dictionary<string, GameObject>();
     IUnityGameObjectProxy unityGameObjectProxy;
     IUnityObjectProxy unityObjectProxy;
     IUnityDebugProxy unityDebugProxy;
-
-    public int PlayersCount => remotePlayers.Count + (localPlayer != null ? 1 : 0);
 
     public GameObject GetLocalPlayer()
     {
@@ -60,6 +68,7 @@ public class PlayersManagementController : IPlayersManagementController
 
         return remotePlayers[id];
     }
+
     public void OnConnectionOpen(SocketIOEvent e)
     {
         unityDebugProxy.Log("connected");
@@ -149,18 +158,19 @@ public class PlayersManagementController : IPlayersManagementController
 
     private void AddRemotePlayer(string playerId)
     {
-        var player = CreatePlayer(playerId);
-        remotePlayers.Add(playerId, player);
+        CreatePlayer(playerId);
+        this.state.AddRemotePlayer(playerId);
     }
 
     private void RemoveRemotePlayer(string playerId)
     {
+        this.state.RemoveRemotePlayer(playerId);
+
         var name = $"Player:{playerId}"; // TODO: improve
         var player = unityGameObjectProxy.Find(name);
         if (player != null)
         {
             unityObjectProxy.Destroy(player);
-            remotePlayers.Remove(playerId);
         }
     }
 

@@ -6,6 +6,7 @@ using Zenject;
 public class PlayersManagement : MonoBehaviour
 {
     public GameObject playerPrefab;
+    public GameSceneState State;
     SocketIOComponent socket;
 
     [Inject]
@@ -13,8 +14,15 @@ public class PlayersManagement : MonoBehaviour
 
     void OnEnable()
     {
+        PassObjectsToController();
+    }
+
+    private void PassObjectsToController()
+    {
+        // Is this the best way to use Unity related objects?
         controller.SetPlayerPrefab(playerPrefab);
         controller.SetSocket(GetSocket());
+        controller.SetState(State);
     }
 
     // Start is called before the first frame update
