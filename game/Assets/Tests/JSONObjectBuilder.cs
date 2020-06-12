@@ -1,24 +1,14 @@
+using System;
 using System.Collections.Generic;
 using SocketIO;
 
 namespace Tests
 {
-    public class JSONObjectBuilder
+    public class JSONObjectBuilder : GenericBuilder<JSONObject>
     {
-        private JSONObject jobj;
-        public JSONObjectBuilder()
-        {
-            this.jobj = new JSONObject();
-        }
-
         public JSONObjectBuilder(Dictionary<string, string> dict)
         {
-            this.jobj = new JSONObject(dict);
-        }
-
-        public static JSONObjectBuilder Empty()
-        {
-            return new JSONObjectBuilder();
+            this.obj = new JSONObject(dict);
         }
 
         public static JSONObjectBuilder Dictionary()
@@ -26,9 +16,17 @@ namespace Tests
             return new JSONObjectBuilder(new Dictionary<string, string>());
         }
 
-        public JSONObject Build()
+        public JSONObjectBuilder WithPlayerId(string value)
         {
-            return this.jobj;
+            this.obj.AddField(SOCKET_DATA_FIELDS.PlayerId, value);
+            return this;
+        }
+
+        internal JSONObjectBuilder WithMovementCoordinates(float horizontal, float vertical)
+        {
+            this.obj.AddField(SOCKET_DATA_FIELDS.HorizontalMovement, horizontal.ToString());
+            this.obj.AddField(SOCKET_DATA_FIELDS.VerticalMovement, vertical.ToString());
+            return this;
         }
     }
 }

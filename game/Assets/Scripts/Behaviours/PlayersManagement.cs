@@ -15,13 +15,13 @@ public class PlayersManagement : MonoBehaviour
     void OnEnable()
     {
         socket = GetComponent<SocketIOComponent>();
+        SetupSocketEventListeners();
         PassObjectsToController();
     }
 
     // Start is called before the first frame update
     void Start()
     {
-        SetupSocketEventListeners();
     }
 
     private void PassObjectsToController()
@@ -34,10 +34,10 @@ public class PlayersManagement : MonoBehaviour
 
     private void SetupSocketEventListeners()
     {
-        socket.On(SocketEvents.SocketOpen, controller.OnConnectionOpen);
-        socket.On(SocketEvents.PlayerNew, controller.OnPlayerAdded);
-        socket.On(SocketEvents.PlayerGone, controller.OnPlayerGone);
-        socket.On(SocketEvents.PlayerOtherPlayers, controller.OnOtherPlayersReceived);
+        socket.On(SOCKET_EVENTS.SocketOpen, controller.OnConnectionOpen);
+        socket.On(SOCKET_EVENTS.PlayerNew, controller.OnPlayerAdded);
+        socket.On(SOCKET_EVENTS.PlayerGone, controller.OnPlayerGone);
+        socket.On(SOCKET_EVENTS.PlayerOtherPlayers, controller.OnOtherPlayersReceived);
 
         Debug.Log("Socket configured");
     }

@@ -56,7 +56,7 @@ namespace Tests
             controller.OnConnectionOpen(socketEvent);
 
             // Then
-            socketMock.Verify(x => x.Emit(SocketEvents.PlayerData), Times.Once);
+            socketMock.Verify(x => x.Emit(SOCKET_EVENTS.PlayerData), Times.Once);
         }
 
         [Test]
@@ -85,7 +85,7 @@ namespace Tests
 
             // Then: remote player object removed from game
             unityGameObjectProxyMock.Verify(x => x.Find("Player:TEST_ID"), Times.Once);
-            unityObjectProxyMock.Verify(x => x.Destroy(fakeGameObject), Times.Once);
+            unityObjectProxyMock.Verify(x => x.DestroyImmediate(fakeGameObject), Times.Once);
             // Then: player removed from the state
             gameStateMock.Verify(x => x.RemoveRemotePlayer("TEST_ID"), Times.Once);
         }
@@ -136,7 +136,7 @@ namespace Tests
         private static JSONObject BuildJSONObjectWithPlayerId(string playerId)
         {
             var jobj = ObjectMother.BuildEmptyJSONObject();
-            jobj.AddField("id", playerId);
+            jobj.AddField(SOCKET_DATA_FIELDS.PlayerId, playerId);
             return jobj;
         }
 

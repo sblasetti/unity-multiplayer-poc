@@ -6,6 +6,8 @@ using Zenject;
 
 public class RemoteMovement : MonoBehaviour
 {
+    public float movementSpeed;
+    public float rotationSpeed;
     public GameSceneState State;
     SocketIOComponent socket;
 
@@ -14,20 +16,26 @@ public class RemoteMovement : MonoBehaviour
 
     void OnEnable()
     {
+    }
+    void Start()
+    {
         socket = GetComponent<SocketIOComponent>();
-    }
-
-    void Setup()
-    {
         SetupSocketEventListeners();
+        PassObjectsToController();
     }
 
-    void FixedUpdate()
+    private void PassObjectsToController()
     {
+        // Is this the best way to use Unity related objects?
+        controller.SetState(State);
+        controller.SetMovementSpeed(movementSpeed);
+        controller.SetRotatonSpeed(rotationSpeed);
     }
 
     private void SetupSocketEventListeners()
     {
-        socket.On(SocketEvents.PlayerRemoteMove, controller.OnRemotePlayerMovement);
+        Debug.Log($"s: {socket != null} | c: {controller != null}");
+        socket.On(SOCKET_EVENTS.PlayerRemoteMove, controller.OnRemotePlayerMovement);
+        Debug.Log("socket set");
     }
 }

@@ -68,12 +68,12 @@ public class PlayersManagementController : IPlayersManagementController
     public void OnConnectionOpen(SocketIOEvent e)
     {
         unityDebugProxy.Log("connected");
-        socket.Emit(SocketEvents.PlayerData);
+        socket.Emit(SOCKET_EVENTS.PlayerData);
     }
 
     public void OnPlayerAdded(SocketIOEvent e)
     {
-        var playerId = e.data.GetField("id").str;
+        var playerId = e.data.GetField(SOCKET_DATA_FIELDS.PlayerId).str;
         unityDebugProxy.Log($"{e.name} - {playerId}");
 
         AddRemotePlayer(playerId);
@@ -81,7 +81,7 @@ public class PlayersManagementController : IPlayersManagementController
 
     public void OnPlayerGone(SocketIOEvent e)
     {
-        var playerId = e.data.GetField("id").str;
+        var playerId = e.data.GetField(SOCKET_DATA_FIELDS.PlayerId).str;
         unityDebugProxy.Log($"{e.name} - {playerId}");
 
         RemoveRemotePlayer(playerId);
@@ -90,7 +90,7 @@ public class PlayersManagementController : IPlayersManagementController
     public void SendPlayerMove(float initialX, float initialY, float horizontal, float vertical)
     {
         var data = BuildPositionData(initialX, initialY, horizontal, vertical);
-        socket.Emit(SocketEvents.PlayerLocalMove, data);
+        socket.Emit(SOCKET_EVENTS.PlayerLocalMove, data);
     }
 
     private static JSONObject BuildPositionData(float initialX, float initialY, float horizontal, float vertical)
@@ -113,7 +113,7 @@ public class PlayersManagementController : IPlayersManagementController
         var players = data.list;
         foreach (var player in players)
         {
-            var playerId = player.GetField("id").str;
+            var playerId = player.GetField(SOCKET_DATA_FIELDS.PlayerId).str;
             AddRemotePlayer(playerId);
 
             unityDebugProxy.Log($"Added remote player {playerId}");
@@ -141,7 +141,7 @@ public class PlayersManagementController : IPlayersManagementController
         var player = unityGameObjectProxy.Find(name);
         if (player != null)
         {
-            unityObjectProxy.Destroy(player);
+            unityObjectProxy.DestroyImmediate(player);
         }
     }
 }

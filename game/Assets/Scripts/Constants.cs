@@ -1,8 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
-public static class SocketEvents
+﻿public static class SOCKET_EVENTS
 {
     public static string PlayerNew = "player:new";
     public static string PlayerData = "player:data";
@@ -11,4 +7,11 @@ public static class SocketEvents
     public static string PlayerRemoteMove = "player:remote-movement";
     public static string PlayerLocalMove = "player:local-movement";
     public static string SocketOpen = "open";
+}
+
+public static class SOCKET_DATA_FIELDS
+{
+    public static string PlayerId = "id";
+    public static string HorizontalMovement = "horizontal";
+    public static string VerticalMovement = "vertical";
 }

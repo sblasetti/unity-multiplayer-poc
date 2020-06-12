@@ -3,13 +3,13 @@ using UnityEngine;
 public interface IUnityObjectProxy
 {
     GameObject Instantiate(GameObject gameObject);
-    void Destroy(GameObject gameObject);
+    void DestroyImmediate(GameObject gameObject);
 }
 public class RealUnityObjectProxy : IUnityObjectProxy
 {
-    public void Destroy(GameObject gameObject)
+    public void DestroyImmediate(GameObject gameObject)
     {
-        UnityEngine.Object.Destroy(gameObject);
+        UnityEngine.Object.DestroyImmediate(gameObject);
     }
 
     public GameObject Instantiate(GameObject gameObject)

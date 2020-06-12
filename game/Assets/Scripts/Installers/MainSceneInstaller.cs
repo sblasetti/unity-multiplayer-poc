@@ -10,9 +10,8 @@ public class MainSceneInstaller : MonoInstaller<MainSceneInstaller>
         Container.Bind<IUnityObjectProxy>().To<RealUnityObjectProxy>().AsSingle();
         Container.Bind<IUnityGameObjectProxy>().To<RealUnityGameObjectProxy>().AsSingle();
         Container.Bind<IUnityDebugProxy>().To<RealUnityDebugProxy>().AsSingle();
-        // var instance = GetComponent<Game>();
-        // Assert.IsNotNull(instance);
-        // Container.Bind<ISocketIOComponent>().FromInstance(instance).AsSingle();
+        Container.Bind<IUnityTimeProxy>().To<RealUnityTimeProxy>().AsSingle();
         Container.Bind<IPlayersManagementController>().To<PlayersManagementController>().AsSingle();
+        Container.Bind<IRemoteMovementController>().To<RemoteMovementController>().AsSingle();
     }
 }
