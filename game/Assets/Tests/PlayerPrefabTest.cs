@@ -15,9 +15,10 @@ namespace Tests
         {
             // var player = MonoBehaviour.Instantiate(Resources.Load<GameObject>("Prefabs/Player"));
             // var networkMove = player.GetComponent<RemoteMovement>();
-            yield return new WaitForSeconds(0.1f);
+            //yield return new WaitForSeconds(0.1f);
             // Assert.IsNotNull(networkMove);
             // Object.DestroyI(player.gameObject);
+            yield return null;
         }
     }
 }

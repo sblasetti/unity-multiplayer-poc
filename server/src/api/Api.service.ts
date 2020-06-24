@@ -1,7 +1,7 @@
 interface ApiService {
     init: () => void;
     getPlayers: () => Player[];
-    addPlayer: (id: string) => void;
+    addPlayer: (data: Player) => void;
     removePlayer: (id: string) => void;
 }
 
@@ -12,12 +12,12 @@ export const apiService = (function apiService(): ApiService {
         players = [];
     }
 
-    function addPlayer(id: string): void {
-        if (players.some((p) => p.id === id)) {
-            throw new Error(`Player '${id}' already exists.`);
+    function addPlayer(data: Player): void {
+        if (players.some((p) => p.id === data.id)) {
+            throw new Error(`Player '${data.id}' already exists.`);
         }
 
-        players = [...players, { id }];
+        players = [...players, data];
     }
 
     function removePlayer(id: string): void {

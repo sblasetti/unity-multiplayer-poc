@@ -5,4 +5,7 @@ using UnityEngine;
 public class PlayerData : ScriptableObject
 {
     public string Id;
+
+    public float PositionX;
+    public float PositionY;
 }

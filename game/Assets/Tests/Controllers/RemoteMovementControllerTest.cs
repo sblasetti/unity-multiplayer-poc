@@ -43,7 +43,7 @@ namespace Tests
                 .WithPlayerId("TEST_ID")
                 .WithMovementCoordinates(horizontal, vertical)
                 .Build();
-            var socketEvent = ObjectMother.BuildSocketIOEvent("test", jobj);
+            var socketEvent = SocketIOEventBuilder.New("test").WithData(jobj).Build();
             const float time = 0.123f;
             unityTimeProxyMock.Setup(x => x.deltaTime).Returns(time);
             const float movementSpeed = 12f;

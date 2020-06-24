@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using ModestTree;
 using SocketIO;
 using UnityEngine;
 
@@ -7,10 +8,10 @@ public interface IPlayersManagementController
 {
     GameObject GetLocalPlayer();
     GameObject GetRemotePlayer(string id);
-    void OnConnectionOpen(SocketIOEvent e);
     void OnOtherPlayersReceived(SocketIOEvent e);
     void OnPlayerAdded(SocketIOEvent e);
     void OnPlayerGone(SocketIOEvent e);
+    void OnPlayerInitialPosition(SocketIOEvent e);
     void SetState(IGameState state);
     void SetPlayerPrefab(GameObject playerPrefab);
     void SetSocket(ISocketIOComponent socket);
@@ -55,28 +56,31 @@ public class PlayersManagementController : IPlayersManagementController
 
     public GameObject GetLocalPlayer()
     {
-        if (localPlayer == null)
-            localPlayer = CreatePlayer("local");
         return localPlayer;
     }
+
     public GameObject GetRemotePlayer(string id)
     {
         var name = $"Player:{id}"; // TODO: improve
         return unityGameObjectProxy.Find(name);
     }
 
-    public void OnConnectionOpen(SocketIOEvent e)
-    {
-        unityDebugProxy.Log("connected");
-        socket.Emit(SOCKET_EVENTS.PlayerData);
-    }
-
     public void OnPlayerAdded(SocketIOEvent e)
     {
         var playerId = e.data.GetField(SOCKET_DATA_FIELDS.PlayerId).str;
-        unityDebugProxy.Log($"{e.name} - {playerId}");
+        if (GetRemotePlayer(playerId) != null) return;
 
-        AddRemotePlayer(playerId);
+        AddPlayerFromJSONObject(e.data);
+    }
+
+    private void AddPlayerFromJSONObject(JSONObject jobj)
+    {
+        var playerId = jobj.GetField(SOCKET_DATA_FIELDS.PlayerId).str;
+        var posObj = jobj.GetField(SOCKET_DATA_FIELDS.Position);
+        var posX = posObj.GetField(SOCKET_DATA_FIELDS.PositionX).f;
+        var posY = posObj.GetField(SOCKET_DATA_FIELDS.PositionY).f;
+
+        AddRemotePlayer(playerId, posX, posY);
     }
 
     public void OnPlayerGone(SocketIOEvent e)
@@ -87,10 +91,26 @@ public class PlayersManagementController : IPlayersManagementController
         RemoveRemotePlayer(playerId);
     }
 
+    public void OnPlayerInitialPosition(SocketIOEvent e)
+    {
+        Debug.Log("position received, player: " + localPlayer);
+
+        if (localPlayer != null) return;
+
+        Assert.That(e.data.HasField("x"));
+        Assert.That(e.data.HasField("y"));
+
+        var x = e.GetFloat("x").Value;
+        var y = e.GetFloat("y").Value;
+
+        var position = new Vector3(x, 0, y);
+        this.localPlayer = this.unityObjectProxy.Instantiate(playerPrefab, position, Quaternion.identity);
+    }
+
     public void SendPlayerMove(float initialX, float initialY, float horizontal, float vertical)
     {
         var data = BuildPositionData(initialX, initialY, horizontal, vertical);
-        socket.Emit(SOCKET_EVENTS.PlayerLocalMove, data);
+        socket.EmitIfConnected(SOCKET_EVENTS.PlayerLocalMove, data);
     }
 
     private static JSONObject BuildPositionData(float initialX, float initialY, float horizontal, float vertical)
@@ -113,24 +133,23 @@ public class PlayersManagementController : IPlayersManagementController
         var players = data.list;
         foreach (var player in players)
         {
-            var playerId = player.GetField(SOCKET_DATA_FIELDS.PlayerId).str;
-            AddRemotePlayer(playerId);
+            AddPlayerFromJSONObject(player);
 
-            unityDebugProxy.Log($"Added remote player {playerId}");
+            unityDebugProxy.Log($"Added remote player {player}");
         }
     }
 
-    private GameObject CreatePlayer(string id)
+    private GameObject CreatePlayer(string id, Vector3 position)
     {
-        var gobj = unityObjectProxy.Instantiate(playerPrefab);
+        var gobj = unityObjectProxy.Instantiate(playerPrefab, position, Quaternion.identity);
         gobj.name = $"Player:{id}"; // TODO: improve
         return gobj;
     }
 
-    private void AddRemotePlayer(string playerId)
+    private void AddRemotePlayer(string playerId, float posX, float posY)
     {
-        CreatePlayer(playerId);
-        this.state.AddRemotePlayer(playerId);
+        CreatePlayer(playerId, new Vector3(posX, 0, posY));
+        this.state.AddRemotePlayer(playerId, posX,  posY);
     }
 
     private void RemoveRemotePlayer(string playerId)

@@ -4,6 +4,7 @@ using Moq;
 using System.Collections.Generic;
 using UnityEngine;
 using SocketIO;
+using System.Linq;
 
 namespace Tests
 {
@@ -11,11 +12,14 @@ namespace Tests
     public class PlayersManagementControllerTest : ZenjectUnitTestFixture
     {
         private IPlayersManagementController controller;
-        private GameObject fakePlayerPrefab = new GameObject();
+        private GameObject fakePlayerPrefab = null;
+        private GameObject fakeLocalPlayer = null;
+        private GameObject fakeRemotePlayer = null;
         private Mock<IUnityGameObjectProxy> unityGameObjectProxyMock = new Mock<IUnityGameObjectProxy>();
         private Mock<IUnityObjectProxy> unityObjectProxyMock = new Mock<IUnityObjectProxy>();
         private Mock<IUnityDebugProxy> unityDebugProxyMock = new Mock<IUnityDebugProxy>();
         private Mock<IGameState> gameStateMock = new Mock<IGameState>();
+        private Mock<ISocketIOComponent> socketMock = null;
 
         /* TODO: investigate how to initialize the DI container that the test has as property
 
@@ -28,6 +32,13 @@ namespace Tests
 
         */
 
+        [OneTimeSetUp]
+        public void OneTimeSetUp()
+        {
+            fakeLocalPlayer = GameObjectBuilder.New().Build();
+            fakeRemotePlayer = GameObjectBuilder.New().Build();
+        }
+
         [SetUp]
         public void SetUp()
         {
@@ -36,48 +47,105 @@ namespace Tests
             unityGameObjectProxyMock.Reset();
             gameStateMock.Reset();
 
+            fakePlayerPrefab = GameObjectBuilder.New().Build();
+
             controller = new PlayersManagementController(
                 unityGameObjectProxyMock.Object, unityObjectProxyMock.Object, unityDebugProxyMock.Object);
             controller.SetPlayerPrefab(fakePlayerPrefab);
             controller.SetState(gameStateMock.Object);
 
-            unityObjectProxyMock.Setup(x => x.Instantiate(It.IsAny<GameObject>())).Returns(ObjectMother.BuildGenericGameObject());
+            socketMock = new Mock<ISocketIOComponent>();
+            controller.SetSocket(socketMock.Object);
+
+            unityObjectProxyMock.Setup(x => x.Instantiate(It.IsAny<GameObject>(), It.IsAny<Vector3>(), It.IsAny<Quaternion>())).Returns(fakeLocalPlayer);
         }
 
         [Test]
-        public void OnConnectionOpen_SendPlayerDataToTheServer()
+        public void OnPlayerInitialPosition_SpawnLocalPlayerAtPosition()
         {
             // Given
-            var socketMock = new Mock<ISocketIOComponent>();
-            controller.SetSocket(socketMock.Object);
+            float posX = 12.2F, posY = 4.1F;
+            var socketEvent = BuildPlayerInitialPositionSocketEvent(posX, posY);
 
             // When
-            var socketEvent = ObjectMother.BuildSocketIOEvent("test", ObjectMother.BuildEmptyJSONObject());
-            controller.OnConnectionOpen(socketEvent);
+            controller.OnPlayerInitialPosition(socketEvent);
 
             // Then
-            socketMock.Verify(x => x.Emit(SOCKET_EVENTS.PlayerData), Times.Once);
+            var expectedPos = new Vector3(posX, 0, posY);
+            unityObjectProxyMock.Verify(x => x.Instantiate(fakePlayerPrefab, expectedPos, Quaternion.identity), Times.Once);
+            Assert.AreEqual(controller.GetLocalPlayer(), fakeLocalPlayer);
+            socketMock.Verify(x => x.Emit(It.IsAny<string>(), It.IsAny<JSONObject>()), Times.Never);
+        }
+
+        [Test]
+        public void OnPlayerInitialPositionAndAlreadySpawned_DoNothing()
+        {
+            // Given
+            float posX = 12.2F, posY = 4.1F;
+            var socketEvent = BuildPlayerInitialPositionSocketEvent(posX, posY);
+            controller.OnPlayerInitialPosition(socketEvent);
+            Assert.AreEqual(controller.GetLocalPlayer(), fakeLocalPlayer);
+            unityObjectProxyMock.Reset();
+
+            // When
+            controller.OnPlayerInitialPosition(socketEvent);
+
+            // Then
+            unityObjectProxyMock.Verify(x => x.Instantiate(fakePlayerPrefab, It.IsAny<Vector3>(), Quaternion.identity), Times.Never);
+            socketMock.Verify(x => x.Emit(It.IsAny<string>(), It.IsAny<JSONObject>()), Times.Never);
+        }
+
+        private static SocketIOEvent BuildPlayerInitialPositionSocketEvent(float posX, float posY)
+        {
+            var data = JSONObjectBuilder.Dictionary()
+                .WithPosition(posX, posY)
+                .Build();
+
+            var socketEvent = SocketIOEventBuilder.Empty(SOCKET_EVENTS.PlayerInitialPosition)
+                .WithData(data)
+                .Build();
+
+            return socketEvent;
         }
 
         [Test]
         public void OnPlayerAdded_PlayerIsCreatedLocallyAndAddedToTheListOfRemotePlayers()
         {
             // Given
-            var socketEvent = BuildSocketIOEventWithPlayerId("test", "TEST_ID");
+            var socketEvent = BuildSocketIOEventWithPlayer(SOCKET_EVENTS.PlayerNew, "TEST_ID", 2.2F, 3.3F);
 
             // When
             controller.OnPlayerAdded(socketEvent);
 
-            AssertARemotePlayerIsCreated("TEST_ID");
-            unityDebugProxyMock.Verify(x => x.Log(It.IsAny<string>()), Times.Once);
+            // Then
+            unityGameObjectProxyMock.Verify(x => x.Find("Player:TEST_ID"), Times.Once);
+            AssertARemotePlayerIsCreatedLocally("TEST_ID", 2.2F, 3.3F);
+        }
+
+        [Test]
+        public void OnPlayerAddedAndAlreadyExists_PlayerIsNotCreated()
+        {
+            // Given
+            var socketEvent = BuildSocketIOEventWithPlayer(SOCKET_EVENTS.PlayerNew, "TEST_ID", 2.2F, 3.3F);
+            controller.OnPlayerAdded(socketEvent);
+            unityObjectProxyMock.Invocations.Clear();
+            gameStateMock.Invocations.Clear();
+            unityGameObjectProxyMock.Setup(x => x.Find("Player:TEST_ID")).Returns(fakeRemotePlayer);
+
+            // When
+            controller.OnPlayerAdded(socketEvent);
+
+            // Then
+            unityGameObjectProxyMock.Verify(x => x.Find("Player:TEST_ID"), Times.Exactly(2));
+            AssertRemotePlayerIsNotCreatedLocally();
         }
 
         [Test]
         public void OnPlayerGone_RemoveRemotePlayerFromLocalGame()
         {
             // Given
-            var socketEvent = BuildSocketIOEventWithPlayerId("test", "TEST_ID");
-            var fakeGameObject = ObjectMother.BuildGenericGameObject();
+            var socketEvent = BuildSocketIOEventWithPlayer("test", "TEST_ID", 4.4F, 5.5F);
+            var fakeGameObject = GameObjectBuilder.New().Build();
             unityGameObjectProxyMock.Setup(x => x.Find(It.IsAny<string>())).Returns(fakeGameObject);
 
             // When
@@ -102,54 +170,51 @@ namespace Tests
             var listObj = new JSONObject(JSONObject.Type.ARRAY);
             listObj.list = players;
             var jobj = new JSONObject(new Dictionary<string, JSONObject> { { "players", listObj } });
-            var socketEvent = ObjectMother.BuildSocketIOEvent("test", jobj);
+            var socketEvent = SocketIOEventBuilder.New("test").WithData(jobj).Build();
             var data = socketEvent.data.GetField("players");
 
             // When
             controller.OnOtherPlayersReceived(socketEvent);
 
             // Then
-            AssertRemotePlayersAreCreated(players.Count);
+            AssertRemotePlayersAreCreatedLocally(players.Count);
         }
 
-        private void AssertARemotePlayerIsCreated(string playerId)
+        private void AssertARemotePlayerIsCreatedLocally(string playerId, float posX, float posY)
         {
             // Then: remote player created as local GameObject using player prefab
-            unityObjectProxyMock.Verify(x => x.Instantiate(fakePlayerPrefab), Times.Once);
+            unityObjectProxyMock.Verify(x => x.Instantiate(fakePlayerPrefab, new Vector3(posX, 0, posY), Quaternion.identity), Times.Once);
             // Then: player added to the list of remotes
-            gameStateMock.Verify(x => x.AddRemotePlayer(playerId), Times.Once);
+            gameStateMock.Verify(x => x.AddRemotePlayer(playerId,  posX, posY), Times.Once);
         }
 
-        private void AssertRemotePlayersAreCreated(int numberOfPlayers)
+        private void AssertRemotePlayersAreCreatedLocally(int numberOfPlayers)
         {
-            unityObjectProxyMock.Verify(x => x.Instantiate(fakePlayerPrefab), Times.Exactly(numberOfPlayers));
-            gameStateMock.Verify(x => x.AddRemotePlayer(It.IsAny<string>()), Times.Exactly(numberOfPlayers));
+            unityObjectProxyMock.Verify(x => x.Instantiate(fakePlayerPrefab, It.IsAny<Vector3>(), Quaternion.identity), Times.Exactly(numberOfPlayers));
+            gameStateMock.Verify(x => x.AddRemotePlayer(It.IsAny<string>(), It.IsAny<float>(), It.IsAny<float>()), Times.Exactly(numberOfPlayers));
         }
 
-        private static SocketIOEvent BuildSocketIOEventWithPlayerId(string eventName, string playerId)
+        private void AssertRemotePlayerIsNotCreatedLocally()
         {
-            var jobj = BuildJSONObjectWithPlayerId(playerId);
-            var socketEvent = ObjectMother.BuildSocketIOEvent(eventName, jobj);
+            unityObjectProxyMock.Verify(x => x.Instantiate(fakePlayerPrefab, It.IsAny<Vector3>(), Quaternion.identity), Times.Never);
+            gameStateMock.Verify(x => x.AddRemotePlayer(It.IsAny<string>(), It.IsAny<float>(), It.IsAny<float>()), Times.Never);
+        }
+
+        private static SocketIOEvent BuildSocketIOEventWithPlayer(string eventName, string playerId, float posX = 0F, float posY = 0F)
+        {
+            var jobj = BuildJSONObjectWithPlayerId(playerId, posX, posY);
+            var socketEvent = SocketIOEventBuilder.New(eventName).WithData(jobj).Build();
             return socketEvent;
         }
 
-        private static JSONObject BuildJSONObjectWithPlayerId(string playerId)
+        private static JSONObject BuildJSONObjectWithPlayerId(string playerId, float posX = 0F, float posY = 0F)
         {
-            var jobj = ObjectMother.BuildEmptyJSONObject();
+            var jobj = JSONObjectBuilder.Dictionary()
+                .WithPlayerId(playerId)
+                .WithPositionObject(posX, posY)
+                .Build();
             jobj.AddField(SOCKET_DATA_FIELDS.PlayerId, playerId);
             return jobj;
-        }
-
-        private void AssertRemotePlayerExists(string id)
-        {
-            var player = controller.GetRemotePlayer(id);
-            Assert.IsNotNull(player);
-        }
-
-        private void AssertRemotePlayerDoesNotExist(string id)
-        {
-            var player = controller.GetRemotePlayer(id);
-            Assert.IsNull(player);
         }
     }
 

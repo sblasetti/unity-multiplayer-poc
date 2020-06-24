@@ -28,5 +28,19 @@ namespace Tests
             this.obj.AddField(SOCKET_DATA_FIELDS.VerticalMovement, vertical.ToString());
             return this;
         }
+
+        internal JSONObjectBuilder WithPositionObject(float x, float y)
+        {
+            var posObj = Dictionary().WithPosition(x, y).Build();
+            this.obj.AddField(SOCKET_DATA_FIELDS.Position, posObj);
+            return this;
+        }
+
+        internal JSONObjectBuilder WithPosition(float x, float y)
+        {
+            this.obj.AddField(SOCKET_DATA_FIELDS.PositionX, x);
+            this.obj.AddField(SOCKET_DATA_FIELDS.PositionY, y);
+            return this;
+        }
     }
 }

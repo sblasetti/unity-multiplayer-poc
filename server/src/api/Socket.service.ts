@@ -1,5 +1,6 @@
 import { apiService } from './Api.service';
 import { SOCKET_EVENTS } from './entities/Constants';
+import { newPlayer } from './entities/PlayerBuilder';
 
 function logMessage(msg: string, socket: SocketIO.Socket): void {
     console.log(`[${socket.id}] ${msg}`);
@@ -8,22 +9,25 @@ function logMessage(msg: string, socket: SocketIO.Socket): void {
 export function OnSocketConnection(socket: SocketIO.Socket): void {
     logMessage('new connection', socket);
 
-    // Get existing players before adding the new one
     const otherPlayers = apiService.getPlayers();
-    apiService.addPlayer(socket.id);
+    logMessage(`other players count: ${otherPlayers.length}`, socket);
+
+    // If socket already registered, exit
+    if (otherPlayers.some((x) => x.id === socket.id)) return;
+
+    // Register new player
+    const player = newPlayer(socket.id);
+    apiService.addPlayer(player);
+
+    // Send initial position to new player
+    socket.emit(SOCKET_EVENTS.Player.InitialPosition, player.position);
+    logMessage('sent position to new player', socket);
 
     // Only communicate the new player if there are other players
     if (!otherPlayers.length) return;
 
-    socket.broadcast.emit(SOCKET_EVENTS.Player.New, { id: socket.id });
-    logMessage('sent new player data to others', socket);
-
-    socket.emit(SOCKET_EVENTS.Player.OtherPlayers, { players: otherPlayers });
-    logMessage('sent list of players', socket);
-}
-
-export function OnPlayerDataReceived(socket: SocketIO.Socket): void {
-    logMessage('player useful data received', socket);
+    socket.broadcast.emit(SOCKET_EVENTS.Player.New, player);
+    logMessage('sent new player to others', socket);
 }
 
 export function OnLocalPlayerMovement(socket: SocketIO.Socket, data: Position & Movement): void {

@@ -4,7 +4,7 @@ using UnityEngine;
 
 public interface IGameState
 {
-    void AddRemotePlayer(string playerId);
+    void AddRemotePlayer(string playerId, float posX, float posY);
     void RemoveRemotePlayer(string playerId);
 }
 
@@ -13,9 +13,9 @@ public class GameSceneState : ScriptableObject, IGameState
 {
     private List<PlayerData> remotePlayers = new List<PlayerData>();
 
-    public void AddRemotePlayer(string playerId)
+    public void AddRemotePlayer(string playerId, float posX, float posY)
     {
-        PlayerData data = BuildPlayerData(playerId);
+        PlayerData data = BuildPlayerData(playerId, posX, posY);
         if (data == null) return;
 
         remotePlayers.Add(data);
@@ -26,13 +26,15 @@ public class GameSceneState : ScriptableObject, IGameState
         this.remotePlayers.RemoveAll(x => x.Id == playerId);
     }
 
-    private static PlayerData BuildPlayerData(string playerId)
+    private static PlayerData BuildPlayerData(string playerId, float posX, float posY)
     {
         var obj = ScriptableObject.CreateInstance(typeof(PlayerData)) as PlayerData;
         if (obj == null) return null;
 
         obj.name = playerId;
         obj.Id = playerId;
+        obj.PositionX = posX;
+        obj.PositionY = posY;
         return obj;
     }
 }

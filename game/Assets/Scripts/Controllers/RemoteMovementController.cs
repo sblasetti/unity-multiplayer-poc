@@ -43,12 +43,9 @@ public class RemoteMovementController : IRemoteMovementController
         var horizontal = e.GetFloat(SOCKET_DATA_FIELDS.HorizontalMovement) ?? 0;
         var vertical = e.GetFloat(SOCKET_DATA_FIELDS.VerticalMovement) ?? 0;
 
-        Debug.Log($"player found: {player != null}");
-
         if (vertical != 0)
         {
             var v = vertical * this.movementSpeed * unityTimeProxy.deltaTime;
-            Debug.Log($"{vertical} - {v} - {movementSpeed}");
             // rb.AddForce(localPlayer.transform.forward * v, forceMode);
             // rb.velocity = localPlayer.transform.forward * vertical * force;
             var rb = player.GetComponent<Rigidbody>();

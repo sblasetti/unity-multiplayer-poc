@@ -1,0 +1,227 @@
+<mxfile host="" modified="2020-06-24T00:05:25.425Z" agent="5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Code/1.46.1 Chrome/78.0.3904.130 Electron/7.3.1 Safari/537.36" etag="Hula8xf1PgBgPxmQbdn0" version="13.1.3" pages="2">
+    <diagram id="6hGFLwfOUW9BJ-s0fimq" name="New Player Join">
+        <mxGraphModel dx="771" dy="480" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="23" style="edgeStyle=orthogonalEdgeStyle;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.25;entryY=1;entryDx=0;entryDy=0;strokeColor=#FFFFFF;" parent="1" source="3" target="3" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="70" y="160" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="120" y="120"/>
+                            <mxPoint x="90" y="120"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="24" value="(8) render &lt;br&gt;remote players" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="23" vertex="1" connectable="0">
+                    <mxGeometry x="0.2889" y="-3" relative="1" as="geometry">
+                        <mxPoint x="8" y="23" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="25" style="edgeStyle=orthogonalEdgeStyle;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.75;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeColor=#FFFFFF;" parent="1" source="3" target="4" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="26" value="(1) open connection&lt;br&gt;with server" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="25" vertex="1" connectable="0">
+                    <mxGeometry x="-0.3087" y="-6" relative="1" as="geometry">
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="3" value="Local Game" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFF33;strokeColor=#B09500;fontColor=#000000;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="60" width="120" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="13" style="edgeStyle=orthogonalEdgeStyle;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.75;exitY=0;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeColor=#FFFFFF;" parent="1" source="4" target="5" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="14" value="(5) send new player &lt;br&gt;info to other games " style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="13" vertex="1" connectable="0">
+                    <mxGeometry x="0.2603" y="-24" relative="1" as="geometry">
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="15" style="edgeStyle=orthogonalEdgeStyle;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.75;exitDx=0;exitDy=0;entryX=0;entryY=0.75;entryDx=0;entryDy=0;strokeColor=#FFFFFF;fillColor=#60a917;" parent="1" source="4" target="3" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="70" y="420" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="20" y="283"/>
+                            <mxPoint x="20" y="83"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="16" value="(7) send other players' info &lt;br&gt;and position&amp;nbsp;to new player" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="15" vertex="1" connectable="0">
+                    <mxGeometry x="-0.3565" y="-36" relative="1" as="geometry">
+                        <mxPoint x="-39" y="13.5" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="27" style="edgeStyle=orthogonalEdgeStyle;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.25;exitDx=0;exitDy=0;entryX=0.75;entryY=1;entryDx=0;entryDy=0;strokeColor=#FFFFFF;" parent="1" source="4" target="3" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="28" value="(3) send initial&lt;br&gt;position" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="27" vertex="1" connectable="0">
+                    <mxGeometry x="-0.0026" y="-26" relative="1" as="geometry">
+                        <mxPoint x="4" y="-59.5" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="4" value="Server" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f0a30a;strokeColor=#BD7000;fontColor=#000000;" parent="1" vertex="1">
+                    <mxGeometry x="310" y="260" width="120" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="5" value="Remote Game" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#60a917;strokeColor=#2D7600;fontColor=#000000;" parent="1" vertex="1">
+                    <mxGeometry x="610" y="90" width="120" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="21" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.75;entryY=0;entryDx=0;entryDy=0;curved=1;strokeColor=#FFFFFF;" parent="1" source="5" target="5" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="670" y="60"/>
+                            <mxPoint x="700" y="60"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="22" value="(6) render new player" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="21" vertex="1" connectable="0">
+                    <mxGeometry x="0.2667" y="-3" relative="1" as="geometry">
+                        <mxPoint y="-13" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="29" style="edgeStyle=orthogonalEdgeStyle;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.25;entryY=1;entryDx=0;entryDy=0;strokeColor=#FFFFFF;" parent="1" source="4" target="4" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="370" y="320"/>
+                            <mxPoint x="340" y="320"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="30" value="(2) store &lt;br&gt;new player" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="29" vertex="1" connectable="0">
+                    <mxGeometry x="-0.4" y="-4" relative="1" as="geometry">
+                        <mxPoint x="-6" y="23" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="36" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.25;entryY=0;entryDx=0;entryDy=0;curved=1;" parent="1" source="3" target="3" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="120" y="30"/>
+                            <mxPoint x="90" y="30"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="37" value="(4) render &lt;br&gt;local player" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="36" vertex="1" connectable="0">
+                    <mxGeometry x="-0.4222" y="5" relative="1" as="geometry">
+                        <mxPoint x="-65" y="-4" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+    <diagram id="HFqJGXF05XEBhKaTk_G-" name="Player Disconnect">
+        &#xa;        &#xa;        &#xa;        
+        <mxGraphModel dx="1062" dy="480" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="700" pageHeight="450" math="0" shadow="0">
+            &#xa;            &#xa;            &#xa;            
+            <root>
+                &#xa;                &#xa;                &#xa;                
+                <mxCell id="JsK6Sz4T_5DIjwYr9bUt-0"/>
+                &#xa;                &#xa;                &#xa;                
+                <mxCell id="JsK6Sz4T_5DIjwYr9bUt-1" parent="JsK6Sz4T_5DIjwYr9bUt-0"/>
+                &#xa;                &#xa;                &#xa;                
+                <mxCell id="YmrfgzfNlimpw8deap8E-4" style="edgeStyle=orthogonalEdgeStyle;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;strokeColor=#FFFFFF;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="JsK6Sz4T_5DIjwYr9bUt-1" source="YmrfgzfNlimpw8deap8E-6" target="YmrfgzfNlimpw8deap8E-13">
+                    &#xa;                    &#xa;                    &#xa;                    
+                    <mxGeometry relative="1" as="geometry"/>
+                    &#xa;                    &#xa;                &#xa;                
+                </mxCell>
+                &#xa;                &#xa;                &#xa;                
+                <mxCell id="YmrfgzfNlimpw8deap8E-5" value="(1) disconnected" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="YmrfgzfNlimpw8deap8E-4">
+                    &#xa;                    &#xa;                    &#xa;                    
+                    <mxGeometry x="-0.3087" y="-6" relative="1" as="geometry">
+                        &#xa;                        &#xa;                        &#xa;                        
+                        <mxPoint x="15" y="9" as="offset"/>
+                        &#xa;                        &#xa;                    &#xa;                    
+                    </mxGeometry>
+                    &#xa;                    &#xa;                &#xa;                
+                </mxCell>
+                &#xa;                &#xa;                &#xa;                
+                <mxCell id="YmrfgzfNlimpw8deap8E-6" value="Local Game" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFF33;strokeColor=#B09500;fontColor=#000000;" vertex="1" parent="JsK6Sz4T_5DIjwYr9bUt-1">
+                    &#xa;                    &#xa;                    &#xa;                    
+                    <mxGeometry x="30" y="90" width="120" height="30" as="geometry"/>
+                    &#xa;                    &#xa;                &#xa;                
+                </mxCell>
+                &#xa;                &#xa;                &#xa;                
+                <mxCell id="YmrfgzfNlimpw8deap8E-7" style="edgeStyle=orthogonalEdgeStyle;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeColor=#FFFFFF;" edge="1" parent="JsK6Sz4T_5DIjwYr9bUt-1" source="YmrfgzfNlimpw8deap8E-13" target="YmrfgzfNlimpw8deap8E-14">
+                    &#xa;                    &#xa;                    &#xa;                    
+                    <mxGeometry relative="1" as="geometry"/>
+                    &#xa;                    &#xa;                &#xa;                
+                </mxCell>
+                &#xa;                &#xa;                &#xa;                
+                <mxCell id="YmrfgzfNlimpw8deap8E-8" value="(3) inform player &lt;br&gt;disconnect" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="YmrfgzfNlimpw8deap8E-7">
+                    &#xa;                    &#xa;                    &#xa;                    
+                    <mxGeometry x="0.2603" y="-24" relative="1" as="geometry">
+                        &#xa;                        &#xa;                        &#xa;                        
+                        <mxPoint x="-19" y="-49" as="offset"/>
+                        &#xa;                        &#xa;                    &#xa;                    
+                    </mxGeometry>
+                    &#xa;                    &#xa;                &#xa;                
+                </mxCell>
+                &#xa;                &#xa;                &#xa;                
+                <mxCell id="YmrfgzfNlimpw8deap8E-13" value="Server" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f0a30a;strokeColor=#BD7000;fontColor=#000000;" vertex="1" parent="JsK6Sz4T_5DIjwYr9bUt-1">
+                    &#xa;                    &#xa;                    &#xa;                    
+                    <mxGeometry x="310" y="90" width="120" height="30" as="geometry"/>
+                    &#xa;                    &#xa;                &#xa;                
+                </mxCell>
+                &#xa;                &#xa;                &#xa;                
+                <mxCell id="YmrfgzfNlimpw8deap8E-14" value="Remote Game" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#60a917;strokeColor=#2D7600;fontColor=#000000;" vertex="1" parent="JsK6Sz4T_5DIjwYr9bUt-1">
+                    &#xa;                    &#xa;                    &#xa;                    
+                    <mxGeometry x="540" y="90" width="120" height="30" as="geometry"/>
+                    &#xa;                    &#xa;                &#xa;                
+                </mxCell>
+                &#xa;                &#xa;                &#xa;                
+                <mxCell id="YmrfgzfNlimpw8deap8E-15" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.75;entryY=0;entryDx=0;entryDy=0;curved=1;strokeColor=#FFFFFF;" edge="1" parent="JsK6Sz4T_5DIjwYr9bUt-1" source="YmrfgzfNlimpw8deap8E-14" target="YmrfgzfNlimpw8deap8E-14">
+                    &#xa;                    &#xa;                    &#xa;                    
+                    <mxGeometry relative="1" as="geometry">
+                        &#xa;                        &#xa;                        &#xa;                        
+                        <Array as="points">
+                            &#xa;                            &#xa;                            &#xa;                            
+                            <mxPoint x="600" y="60"/>
+                            &#xa;                            &#xa;                            &#xa;                            
+                            <mxPoint x="630" y="60"/>
+                            &#xa;                            &#xa;                        &#xa;                        
+                        </Array>
+                        &#xa;                        &#xa;                    &#xa;                    
+                    </mxGeometry>
+                    &#xa;                    &#xa;                &#xa;                
+                </mxCell>
+                &#xa;                &#xa;                &#xa;                
+                <mxCell id="YmrfgzfNlimpw8deap8E-16" value="(4) destroy player" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="YmrfgzfNlimpw8deap8E-15">
+                    &#xa;                    &#xa;                    &#xa;                    
+                    <mxGeometry x="0.2667" y="-3" relative="1" as="geometry">
+                        &#xa;                        &#xa;                        &#xa;                        
+                        <mxPoint y="-13" as="offset"/>
+                        &#xa;                        &#xa;                    &#xa;                    
+                    </mxGeometry>
+                    &#xa;                    &#xa;                &#xa;                
+                </mxCell>
+                &#xa;                &#xa;                &#xa;                
+                <mxCell id="YmrfgzfNlimpw8deap8E-17" style="edgeStyle=orthogonalEdgeStyle;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.75;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;strokeColor=#FFFFFF;" edge="1" parent="JsK6Sz4T_5DIjwYr9bUt-1" source="YmrfgzfNlimpw8deap8E-13" target="YmrfgzfNlimpw8deap8E-13">
+                    &#xa;                    &#xa;                    &#xa;                    
+                    <mxGeometry relative="1" as="geometry">
+                        &#xa;                        &#xa;                        &#xa;                        
+                        <Array as="points">
+                            &#xa;                            &#xa;                            &#xa;                            
+                            <mxPoint x="400" y="150"/>
+                            &#xa;                            &#xa;                            &#xa;                            
+                            <mxPoint x="370" y="150"/>
+                            &#xa;                            &#xa;                        &#xa;                        
+                        </Array>
+                        &#xa;                        &#xa;                    &#xa;                    
+                    </mxGeometry>
+                    &#xa;                    &#xa;                &#xa;                
+                </mxCell>
+                &#xa;                &#xa;                &#xa;                
+                <mxCell id="YmrfgzfNlimpw8deap8E-18" value="(2) remove player" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="YmrfgzfNlimpw8deap8E-17">
+                    &#xa;                    &#xa;                    &#xa;                    
+                    <mxGeometry x="-0.4" y="-4" relative="1" as="geometry">
+                        &#xa;                        &#xa;                        &#xa;                        
+                        <mxPoint x="-16" y="23" as="offset"/>
+                        &#xa;                        &#xa;                    &#xa;                    
+                    </mxGeometry>
+                    &#xa;                    &#xa;                &#xa;                
+                </mxCell>
+                &#xa;                &#xa;            &#xa;            
+            </root>
+            &#xa;            &#xa;        &#xa;        
+        </mxGraphModel>
+        &#xa;        &#xa;    &#xa;    
+    </diagram>
+</mxfile>

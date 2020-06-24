@@ -34,7 +34,7 @@ public class PlayersManagement : MonoBehaviour
 
     private void SetupSocketEventListeners()
     {
-        socket.On(SOCKET_EVENTS.SocketOpen, controller.OnConnectionOpen);
+        socket.On(SOCKET_EVENTS.PlayerInitialPosition, controller.OnPlayerInitialPosition);
         socket.On(SOCKET_EVENTS.PlayerNew, controller.OnPlayerAdded);
         socket.On(SOCKET_EVENTS.PlayerGone, controller.OnPlayerGone);
         socket.On(SOCKET_EVENTS.PlayerOtherPlayers, controller.OnOtherPlayersReceived);

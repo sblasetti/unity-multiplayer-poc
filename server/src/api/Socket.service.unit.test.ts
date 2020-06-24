@@ -2,62 +2,89 @@ import { mock, MockProxy, mockReset } from 'jest-mock-extended';
 import { OnSocketConnection, OnSocketDisconnection } from './Socket.service';
 import { SOCKET_EVENTS } from './entities/Constants';
 import { apiService } from './Api.service';
+import { newPlayer } from './entities/PlayerBuilder';
 
 jest.mock('./Api.service');
 
-const consoleLogSpy = jest.spyOn(console, 'log').mockImplementation();
+jest.spyOn(console, 'log').mockImplementation();
 
 const socketMock: MockProxy<SocketIO.Socket> = mock<SocketIO.Socket>();
 socketMock.broadcast = mock<SocketIO.Socket>();
 
-describe('SocketService.OnSocketConnection', () => {
+describe('New Player Join - SocketService.OnSocketConnection', () => {
     beforeEach(() => {
         mockReset(socketMock);
         jest.resetAllMocks();
     });
 
-    it('On first connection, register player and do not send any other message', () => {
+    it('On a connection from an already connected socket, do nothing', () => {
         // Given
         socketMock.id = 'MOCK_ID';
-        const playerData = { id: socketMock.id };
-        apiService.getPlayers = jest.fn(() => []);
+        const playerData: Player = newPlayer(socketMock.id);
+        apiService.getPlayers = jest.fn(() => [playerData]);
 
         // When
         OnSocketConnection(socketMock);
 
-        // Then: player registered in server
-        expect(apiService.addPlayer).toHaveBeenCalledTimes(1);
-        expect(apiService.addPlayer).toHaveBeenCalledWith(playerData.id);
-        // Then: no broadcasting to other players
-        expect(socketMock.broadcast.emit).toHaveBeenCalledTimes(0);
-        // Then: no other players to inform back
+        // Then: do nothing (the player has already connected before)
         expect(socketMock.emit).toHaveBeenCalledTimes(0);
+        expect(socketMock.broadcast.emit).toHaveBeenCalledTimes(0);
     });
 
-    it('On any other connection, register new player, communicate players list delta to players', () => {
+    it('On a new connection and no other players, define initial position and send to new player', () => {
+        // Given
+        socketMock.id = 'MOCK_ID';
+        apiService.getPlayers = jest.fn(() => []);
+        const playerData: Player = newPlayer(socketMock.id);
+
+        // When
+        OnSocketConnection(socketMock);
+
+        // Then: define and store new player position
+        expect(apiService.addPlayer).toHaveBeenCalledTimes(1);
+        expect(apiService.addPlayer).toHaveBeenCalledWith(playerData);
+        // Then: inform position to new player
+        expect(socketMock.emit).toHaveBeenCalledTimes(1);
+        expect(socketMock.emit).toHaveBeenCalledWith(SOCKET_EVENTS.Player.InitialPosition, playerData.position);
+        // Then: don't boradcast new player to other players
+        expect(socketMock.broadcast.emit).toHaveBeenCalledTimes(0);
+    });
+
+    it('On a new connection with other players, send initial position to new player and send new player info to other players', () => {
         // Given
         socketMock.id = 'THIRD_ID';
-        const playerData = { id: socketMock.id };
-        const existingPlayers = [{ id: 'FIRST_ID' }, { id: 'SECOND_ID' }];
+        const playerData = newPlayer(socketMock.id);
+        const existingPlayers: Player[] = [
+            { id: 'FIRST_ID', position: { x: 0, y: 0 } },
+            { id: 'SECOND_ID', position: { x: 0, y: 0 } },
+        ];
         apiService.getPlayers = jest.fn(() => existingPlayers);
 
         // When
         OnSocketConnection(socketMock);
 
-        // Then: both players registered in server
+        // Then: define and store new player position
         expect(apiService.addPlayer).toHaveBeenCalledTimes(1);
-        expect(apiService.addPlayer).toHaveBeenCalledWith(playerData.id);
-        // Then: new player is broadcasted to existing players
-        expect(socketMock.broadcast.emit).toHaveBeenCalledTimes(1);
-        expect(socketMock.broadcast.emit).toHaveBeenCalledWith(SOCKET_EVENTS.Player.New, { id: 'THIRD_ID' });
-        // Then: existing players informed back to new player
+        expect(apiService.addPlayer).toHaveBeenCalledWith(playerData);
+        // Then: inform position to new player
         expect(socketMock.emit).toHaveBeenCalledTimes(1);
-        expect(socketMock.emit).toHaveBeenCalledWith(SOCKET_EVENTS.Player.OtherPlayers, {
-            players: existingPlayers,
-        });
+        expect(socketMock.emit).toHaveBeenCalledWith(SOCKET_EVENTS.Player.InitialPosition, playerData.position);
+        // Then: boradcast new player to other players
+        expect(socketMock.broadcast.emit).toHaveBeenCalledTimes(1);
+        expect(socketMock.broadcast.emit).toHaveBeenCalledWith(SOCKET_EVENTS.Player.New, playerData);
+    });
+    afterAll(() => {
+        // TBD
+    });
+});
+
+describe('Player Disconnect - SocketService.OnSocketDisconnection', () => {
+    beforeEach(() => {
+        mockReset(socketMock);
+        jest.resetAllMocks();
     });
 
-    it('OnSocketDisconnection remove player and broadcast removal to other connections', () => {
+    it('On disconnection remove player and broadcast removal to other connections', () => {
         // Given
         socketMock.id = 'MOCK_ID';
         const playerData = { id: socketMock.id };
@@ -72,6 +99,6 @@ describe('SocketService.OnSocketConnection', () => {
     });
 
     afterAll(() => {
-        consoleLogSpy.mockRestore();
+        // TBD
     });
 });

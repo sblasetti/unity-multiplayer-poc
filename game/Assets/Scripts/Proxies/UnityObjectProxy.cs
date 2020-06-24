@@ -2,7 +2,7 @@ using UnityEngine;
 
 public interface IUnityObjectProxy
 {
-    GameObject Instantiate(GameObject gameObject);
+    GameObject Instantiate(GameObject gameObject, Vector3 position, Quaternion rotation);
     void DestroyImmediate(GameObject gameObject);
 }
 public class RealUnityObjectProxy : IUnityObjectProxy
@@ -12,9 +12,9 @@ public class RealUnityObjectProxy : IUnityObjectProxy
         UnityEngine.Object.DestroyImmediate(gameObject);
     }
 
-    public GameObject Instantiate(GameObject gameObject)
+    public GameObject Instantiate(GameObject gameObject, Vector3 position, Quaternion rotation)
     {
-        return UnityEngine.Object.Instantiate(gameObject);
+        return UnityEngine.Object.Instantiate(gameObject, position, rotation);
     }
 
     public void Log(string str)

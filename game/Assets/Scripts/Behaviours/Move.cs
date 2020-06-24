@@ -10,19 +10,25 @@ public class Move : MonoBehaviour
     public ForceMode forceMode = ForceMode.Force;
     Vector3 direction;
 
-    void Start()
+    private PlayersManagement playersMgmt = null;
+
+    private void Awake()
     {
-        var playersMgmt = this.GetComponent<PlayersManagement>();
-        localPlayer = playersMgmt.GetLocalPlayer();
-        direction = localPlayer.transform.forward;
-        rb = localPlayer.GetComponent<Rigidbody>();
-        Debug.Log($"forward: {localPlayer.transform.forward}");
-        Debug.Log($"up: {localPlayer.transform.up}");
-        Debug.Log($"right: {localPlayer.transform.right}");
+        playersMgmt = this.GetComponent<PlayersManagement>();
     }
 
     void Update()
     {
+        if (localPlayer == null)
+        {
+            localPlayer = playersMgmt.GetLocalPlayer();
+            if (localPlayer != null)
+            {
+                direction = localPlayer.transform.forward;
+                rb = localPlayer.GetComponent<Rigidbody>();
+            }
+        }
+
         var horizontal = Input.GetAxis("Horizontal");
         var vertical = Input.GetAxis("Vertical");
         direction = new Vector3(horizontal, 0, vertical);
@@ -71,14 +77,13 @@ public class Move : MonoBehaviour
 
         #endregion
 
-        Debug.DrawRay(localPlayer.transform.position, localPlayer.transform.forward, Color.red);
+        if (localPlayer != null)
+            Debug.DrawRay(localPlayer.transform.position, localPlayer.transform.forward, Color.red);
 
         if (horizontal == 0 && vertical == 0)
             return;
 
-        Debug.Log("send movement over network");
-
         var playersMgmt = this.GetComponent<PlayersManagement>();
-        playersMgmt.SendPlayerMove(localPlayer.transform.position, horizontal, vertical);
+        //playersMgmt.SendPlayerMove(localPlayer.transform.position, horizontal, vertical);
     }
 }
