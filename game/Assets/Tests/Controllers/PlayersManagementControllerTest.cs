@@ -167,17 +167,34 @@ namespace Tests
                 BuildJSONObjectWithPlayerId("2"),
                 BuildJSONObjectWithPlayerId("3"),
             };
-            var listObj = new JSONObject(JSONObject.Type.ARRAY);
-            listObj.list = players;
-            var jobj = new JSONObject(new Dictionary<string, JSONObject> { { "players", listObj } });
-            var socketEvent = SocketIOEventBuilder.New("test").WithData(jobj).Build();
-            var data = socketEvent.data.GetField("players");
+            SocketIOEvent socketEvent = BuildOnPlayerReceivedEvent(players);
 
             // When
             controller.OnOtherPlayersReceived(socketEvent);
 
             // Then
             AssertRemotePlayersAreCreatedLocally(players.Count);
+        }
+
+        [Test]
+        public void OnOtherPlayersReceived_ShouldNotAddRemotePlayerIfAlreadyExists()
+        {
+            // Given
+            var players = new List<JSONObject> {
+                BuildJSONObjectWithPlayerId("1"),
+                BuildJSONObjectWithPlayerId("2"),
+                BuildJSONObjectWithPlayerId("3"),
+            };
+            SocketIOEvent socketEvent = BuildOnPlayerReceivedEvent(players);
+            unityGameObjectProxyMock.Setup(x => x.Find("Player:2")).Returns(fakeRemotePlayer);
+            gameStateMock.Setup(x => x.RemotePlayerExists("2")).Returns(true);
+
+            // When
+            controller.OnOtherPlayersReceived(socketEvent);
+
+            // Then
+            AssertRemotePlayersAreCreatedLocally(2);
+            gameStateMock.Verify(x => x.AddRemotePlayer("2", It.IsAny<float>(), It.IsAny<float>()), Times.Never);
         }
 
         private void AssertARemotePlayerIsCreatedLocally(string playerId, float posX, float posY)
@@ -198,6 +215,16 @@ namespace Tests
         {
             unityObjectProxyMock.Verify(x => x.Instantiate(fakePlayerPrefab, It.IsAny<Vector3>(), Quaternion.identity), Times.Never);
             gameStateMock.Verify(x => x.AddRemotePlayer(It.IsAny<string>(), It.IsAny<float>(), It.IsAny<float>()), Times.Never);
+        }
+
+        private static SocketIOEvent BuildOnPlayerReceivedEvent(List<JSONObject> players)
+        {
+            var listObj = new JSONObject(JSONObject.Type.ARRAY);
+            listObj.list = players;
+            var jobj = new JSONObject(new Dictionary<string, JSONObject> { { "players", listObj } });
+            var socketEvent = SocketIOEventBuilder.New("test").WithData(jobj).Build();
+            var data = socketEvent.data.GetField("players");
+            return socketEvent;
         }
 
         private static SocketIOEvent BuildSocketIOEventWithPlayer(string eventName, string playerId, float posX = 0F, float posY = 0F)
