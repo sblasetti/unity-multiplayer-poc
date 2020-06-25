@@ -1,5 +1,5 @@
 import { mock, MockProxy, mockReset } from 'jest-mock-extended';
-import { OnSocketConnection, OnSocketDisconnection } from './Socket.service';
+import { OnSocketConnection, OnSocketDisconnection, OnPlayerJoin } from './Socket.service';
 import { SOCKET_EVENTS } from './entities/Constants';
 import { apiService } from './Api.service';
 import { newPlayer } from './entities/PlayerBuilder';
@@ -11,7 +11,7 @@ jest.spyOn(console, 'log').mockImplementation();
 const socketMock: MockProxy<SocketIO.Socket> = mock<SocketIO.Socket>();
 socketMock.broadcast = mock<SocketIO.Socket>();
 
-describe('New Player Join - SocketService.OnSocketConnection', () => {
+describe('Player Connects - SocketService.OnSocketConnection', () => {
     beforeEach(() => {
         mockReset(socketMock);
         jest.resetAllMocks();
@@ -31,7 +31,7 @@ describe('New Player Join - SocketService.OnSocketConnection', () => {
         expect(socketMock.broadcast.emit).toHaveBeenCalledTimes(0);
     });
 
-    it('On a new connection and no other players, define initial position and send to new player', () => {
+    it('On a new connection, define initial position and send to new player', () => {
         // Given
         socketMock.id = 'MOCK_ID';
         apiService.getPlayers = jest.fn(() => []);
@@ -40,17 +40,60 @@ describe('New Player Join - SocketService.OnSocketConnection', () => {
         // When
         OnSocketConnection(socketMock);
 
-        // Then: define and store new player position
-        expect(apiService.addPlayer).toHaveBeenCalledTimes(1);
-        expect(apiService.addPlayer).toHaveBeenCalledWith(playerData);
+        // Then: do not store the player yet
+        expect(apiService.addPlayer).toHaveBeenCalledTimes(0);
         // Then: inform position to new player
         expect(socketMock.emit).toHaveBeenCalledTimes(1);
         expect(socketMock.emit).toHaveBeenCalledWith(SOCKET_EVENTS.Player.InitialPosition, playerData.position);
-        // Then: don't boradcast new player to other players
+        // Then: don't broadcast new player to other players
         expect(socketMock.broadcast.emit).toHaveBeenCalledTimes(0);
     });
 
-    it('On a new connection with other players, send initial position to new player and send new player info to other players', () => {
+    afterAll(() => {
+        // TBD
+    });
+});
+
+describe('Player Joins The Game - SocketService.OnPlayerJoin', () => {
+    beforeEach(() => {
+        mockReset(socketMock);
+        jest.resetAllMocks();
+    });
+
+    it('On a new join from an already existing player, do nothing', () => {
+        // Given
+        socketMock.id = 'MOCK_ID';
+        const playerData: Player = newPlayer(socketMock.id);
+        apiService.getPlayers = jest.fn(() => [playerData]);
+
+        // When
+        OnPlayerJoin(socketMock);
+
+        // Then: do nothing (the player has already joined)
+        expect(apiService.addPlayer).toHaveBeenCalledTimes(0);
+        expect(socketMock.emit).toHaveBeenCalledTimes(0);
+        expect(socketMock.broadcast.emit).toHaveBeenCalledTimes(0);
+    });
+
+    it('On a new join and no other players, store the player and nothing else', () => {
+        // Given
+        socketMock.id = 'MOCK_ID';
+        apiService.getPlayers = jest.fn(() => []);
+        const playerData: Player = newPlayer(socketMock.id);
+
+        // When
+        OnPlayerJoin(socketMock);
+
+        // Then: store new player
+        expect(apiService.addPlayer).toHaveBeenCalledTimes(1);
+        expect(apiService.addPlayer).toHaveBeenCalledWith(playerData);
+        // Then: don-t send other players info to new player
+        expect(socketMock.emit).toHaveBeenCalledTimes(0);
+        // Then: don't broadcast new player to other players
+        expect(socketMock.broadcast.emit).toHaveBeenCalledTimes(0);
+    });
+
+    it('On a new join with other players, send existing players to new player and new player info to other players', () => {
         // Given
         socketMock.id = 'THIRD_ID';
         const playerData = newPlayer(socketMock.id);
@@ -61,27 +104,25 @@ describe('New Player Join - SocketService.OnSocketConnection', () => {
         apiService.getPlayers = jest.fn(() => existingPlayers);
 
         // When
-        OnSocketConnection(socketMock);
+        OnPlayerJoin(socketMock);
 
-        // Then
-        expect(socketMock.emit).toHaveBeenCalledTimes(2);
-        // Then: define and store new player position
+        // Then: store new player
         expect(apiService.addPlayer).toHaveBeenCalledTimes(1);
         expect(apiService.addPlayer).toHaveBeenCalledWith(playerData);
-        // Then: inform position to new player
-        expect(socketMock.emit).toHaveBeenNthCalledWith(1, SOCKET_EVENTS.Player.InitialPosition, playerData.position);
-        // Then: boradcast new player to other players
+        // Then: broadcast new player to other players
         expect(socketMock.broadcast.emit).toHaveBeenCalledTimes(1);
         expect(socketMock.broadcast.emit).toHaveBeenCalledWith(SOCKET_EVENTS.Player.New, playerData);
         // Then: inform other players to new player
-        expect(socketMock.emit).toHaveBeenNthCalledWith(2, SOCKET_EVENTS.Player.OtherPlayers, existingPlayers);
+        expect(socketMock.emit).toHaveBeenCalledTimes(1);
+        expect(socketMock.emit).toHaveBeenCalledWith(SOCKET_EVENTS.Player.OtherPlayers, existingPlayers);
     });
+
     afterAll(() => {
         // TBD
     });
 });
 
-describe('Player Disconnect - SocketService.OnSocketDisconnection', () => {
+describe('Player Disconnects - SocketService.OnSocketDisconnection', () => {
     beforeEach(() => {
         mockReset(socketMock);
         jest.resetAllMocks();

@@ -9,19 +9,33 @@ function logMessage(msg: string, socket: SocketIO.Socket): void {
 export function OnSocketConnection(socket: SocketIO.Socket): void {
     logMessage('new connection', socket);
 
+    // If socket already registered, exit
+    const otherPlayers = apiService.getPlayers();
+    if (otherPlayers.some((x) => x.id === socket.id)) return;
+
+    // Define position
+    const position = {
+        x: 0,
+        y: 0
+    };
+
+    // Send initial position to new player
+    socket.emit(SOCKET_EVENTS.Player.InitialPosition, position);
+    logMessage('sent position to new player', socket);
+}
+
+export function OnPlayerJoin(socket: SocketIO.Socket) {
+    logMessage('player join', socket);
+
     const otherPlayers = apiService.getPlayers();
     logMessage(`other players count: ${otherPlayers.length}`, socket);
 
-    // If socket already registered, exit
+    // If player already registered, exit
     if (otherPlayers.some((x) => x.id === socket.id)) return;
 
     // Register new player
     const player = newPlayer(socket.id);
     apiService.addPlayer(player);
-
-    // Send initial position to new player
-    socket.emit(SOCKET_EVENTS.Player.InitialPosition, player.position);
-    logMessage('sent position to new player', socket);
 
     // Only communicate the new player if there are other players
     if (!otherPlayers.length) return;
