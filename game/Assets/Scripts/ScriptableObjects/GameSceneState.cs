@@ -1,11 +1,13 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public interface IGameState
 {
     void AddRemotePlayer(string playerId, float posX, float posY);
     void RemoveRemotePlayer(string playerId);
+    bool RemotePlayerExists(string playerId);
 }
 
 [CreateAssetMenu(menuName = "Seba/GameSceneState")]
@@ -24,6 +26,11 @@ public class GameSceneState : ScriptableObject, IGameState
     public void RemoveRemotePlayer(string playerId)
     {
         this.remotePlayers.RemoveAll(x => x.Id == playerId);
+    }
+
+    public bool RemotePlayerExists(string playerId)
+    {
+        return remotePlayers.Any(x => x.Id == playerId);
     }
 
     private static PlayerData BuildPlayerData(string playerId, float posX, float posY)

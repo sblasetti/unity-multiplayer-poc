@@ -133,7 +133,9 @@ public class PlayersManagementController : IPlayersManagementController
         var players = data.list;
         foreach (var player in players)
         {
-            AddPlayerFromJSONObject(player);
+            var playerId = player.GetField(SOCKET_DATA_FIELDS.PlayerId).str;
+            if (!state.RemotePlayerExists(playerId))
+                AddPlayerFromJSONObject(player);
 
             unityDebugProxy.Log($"Added remote player {player}");
         }

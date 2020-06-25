@@ -28,6 +28,9 @@ export function OnSocketConnection(socket: SocketIO.Socket): void {
 
     socket.broadcast.emit(SOCKET_EVENTS.Player.New, player);
     logMessage('sent new player to others', socket);
+
+    socket.emit(SOCKET_EVENTS.Player.OtherPlayers, otherPlayers);
+    logMessage('sent other players to new player', socket);
 }
 
 export function OnLocalPlayerMovement(socket: SocketIO.Socket, data: Position & Movement): void {

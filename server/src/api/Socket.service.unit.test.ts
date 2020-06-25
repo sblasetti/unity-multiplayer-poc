@@ -63,15 +63,18 @@ describe('New Player Join - SocketService.OnSocketConnection', () => {
         // When
         OnSocketConnection(socketMock);
 
+        // Then
+        expect(socketMock.emit).toHaveBeenCalledTimes(2);
         // Then: define and store new player position
         expect(apiService.addPlayer).toHaveBeenCalledTimes(1);
         expect(apiService.addPlayer).toHaveBeenCalledWith(playerData);
         // Then: inform position to new player
-        expect(socketMock.emit).toHaveBeenCalledTimes(1);
-        expect(socketMock.emit).toHaveBeenCalledWith(SOCKET_EVENTS.Player.InitialPosition, playerData.position);
+        expect(socketMock.emit).toHaveBeenNthCalledWith(1, SOCKET_EVENTS.Player.InitialPosition, playerData.position);
         // Then: boradcast new player to other players
         expect(socketMock.broadcast.emit).toHaveBeenCalledTimes(1);
         expect(socketMock.broadcast.emit).toHaveBeenCalledWith(SOCKET_EVENTS.Player.New, playerData);
+        // Then: inform other players to new player
+        expect(socketMock.emit).toHaveBeenNthCalledWith(2, SOCKET_EVENTS.Player.OtherPlayers, existingPlayers);
     });
     afterAll(() => {
         // TBD
