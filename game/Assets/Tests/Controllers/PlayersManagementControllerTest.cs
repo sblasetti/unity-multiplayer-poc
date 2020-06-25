@@ -57,55 +57,44 @@ namespace Tests
             socketMock = new Mock<ISocketIOComponent>();
             controller.SetSocket(socketMock.Object);
 
+            socketMock.Setup(x => x.IsConnected).Returns(true);
             unityObjectProxyMock.Setup(x => x.Instantiate(It.IsAny<GameObject>(), It.IsAny<Vector3>(), It.IsAny<Quaternion>())).Returns(fakeLocalPlayer);
         }
 
         [Test]
-        public void OnPlayerInitialPosition_SpawnLocalPlayerAtPosition()
+        public void OnPlayerWelcome_SpawnLocalPlayerAtPositionAndInformTheServer()
         {
             // Given
             float posX = 12.2F, posY = 4.1F;
             var socketEvent = BuildPlayerInitialPositionSocketEvent(posX, posY);
 
             // When
-            controller.OnPlayerInitialPosition(socketEvent);
+            controller.OnPlayerWelcome(socketEvent);
 
             // Then
             var expectedPos = new Vector3(posX, 0, posY);
             unityObjectProxyMock.Verify(x => x.Instantiate(fakePlayerPrefab, expectedPos, Quaternion.identity), Times.Once);
             Assert.AreEqual(controller.GetLocalPlayer(), fakeLocalPlayer);
-            socketMock.Verify(x => x.Emit(It.IsAny<string>(), It.IsAny<JSONObject>()), Times.Never);
+            socketMock.Verify(x => x.Emit(SOCKET_EVENTS.PlayerJoin, It.IsAny<JSONObject>()), Times.Once);
         }
 
         [Test]
-        public void OnPlayerInitialPositionAndAlreadySpawned_DoNothing()
+        public void OnPlayerWelcomeAndAlreadySpawned_DoNothing()
         {
             // Given
             float posX = 12.2F, posY = 4.1F;
             var socketEvent = BuildPlayerInitialPositionSocketEvent(posX, posY);
-            controller.OnPlayerInitialPosition(socketEvent);
+            controller.OnPlayerWelcome(socketEvent);
             Assert.AreEqual(controller.GetLocalPlayer(), fakeLocalPlayer);
-            unityObjectProxyMock.Reset();
+            unityObjectProxyMock.Invocations.Clear();
+            socketMock.Invocations.Clear();
 
             // When
-            controller.OnPlayerInitialPosition(socketEvent);
+            controller.OnPlayerWelcome(socketEvent);
 
             // Then
             unityObjectProxyMock.Verify(x => x.Instantiate(fakePlayerPrefab, It.IsAny<Vector3>(), Quaternion.identity), Times.Never);
             socketMock.Verify(x => x.Emit(It.IsAny<string>(), It.IsAny<JSONObject>()), Times.Never);
-        }
-
-        private static SocketIOEvent BuildPlayerInitialPositionSocketEvent(float posX, float posY)
-        {
-            var data = JSONObjectBuilder.Dictionary()
-                .WithPosition(posX, posY)
-                .Build();
-
-            var socketEvent = SocketIOEventBuilder.Empty(SOCKET_EVENTS.PlayerInitialPosition)
-                .WithData(data)
-                .Build();
-
-            return socketEvent;
         }
 
         [Test]
@@ -197,6 +186,19 @@ namespace Tests
             gameStateMock.Verify(x => x.AddRemotePlayer("2", It.IsAny<float>(), It.IsAny<float>()), Times.Never);
         }
 
+        private static SocketIOEvent BuildPlayerInitialPositionSocketEvent(float posX, float posY)
+        {
+            var data = JSONObjectBuilder.Empty()
+                .WithPosition(posX, posY)
+                .WrapAsPayload();
+
+            var socketEvent = SocketIOEventBuilder.Empty(SOCKET_EVENTS.PlayerWelcome)
+                .WithData(data)
+                .Build();
+
+            return socketEvent;
+        }
+
         private void AssertARemotePlayerIsCreatedLocally(string playerId, float posX, float posY)
         {
             // Then: remote player created as local GameObject using player prefab
@@ -219,9 +221,9 @@ namespace Tests
 
         private static SocketIOEvent BuildOnPlayerReceivedEvent(List<JSONObject> players)
         {
-            var listObj = new JSONObject(JSONObject.Type.ARRAY);
-            listObj.list = players;
-            var jobj = new JSONObject(new Dictionary<string, JSONObject> { { "players", listObj } });
+            var jobj = JSONObjectBuilder.Empty()
+                .WithField(SOCKET_DATA_FIELDS.Payload, players)
+                .Build();
             var socketEvent = SocketIOEventBuilder.New("test").WithData(jobj).Build();
             var data = socketEvent.data.GetField("players");
             return socketEvent;
@@ -229,18 +231,21 @@ namespace Tests
 
         private static SocketIOEvent BuildSocketIOEventWithPlayer(string eventName, string playerId, float posX = 0F, float posY = 0F)
         {
-            var jobj = BuildJSONObjectWithPlayerId(playerId, posX, posY);
+            var jobj = JSONObjectBuilder.Empty()
+                .WithPayload(BuildJSONObjectWithPlayerId(playerId, posX, posY))
+                .Build();
             var socketEvent = SocketIOEventBuilder.New(eventName).WithData(jobj).Build();
             return socketEvent;
         }
 
         private static JSONObject BuildJSONObjectWithPlayerId(string playerId, float posX = 0F, float posY = 0F)
         {
-            var jobj = JSONObjectBuilder.Dictionary()
+            var jobj = JSONObjectBuilder.Empty()
                 .WithPlayerId(playerId)
+                .WithField(SOCKET_DATA_FIELDS.PlayerId, playerId)
                 .WithPositionObject(posX, posY)
                 .Build();
-            jobj.AddField(SOCKET_DATA_FIELDS.PlayerId, playerId);
+
             return jobj;
         }
     }

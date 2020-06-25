@@ -1,4 +1,5 @@
 interface ApiService {
+    calculateInitialPosition: () => MapCoordinates;
     init: () => void;
     getPlayers: () => Player[];
     addPlayer: (data: Player) => void;
@@ -28,10 +29,19 @@ export const apiService = (function apiService(): ApiService {
         return players;
     }
 
+    function calculateInitialPosition() : MapCoordinates {
+        return {
+            x: 0,
+            y: 0,
+            z: 0
+        };
+    }
+
     return {
         init,
         addPlayer,
         getPlayers,
         removePlayer,
+        calculateInitialPosition
     };
 })();

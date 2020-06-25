@@ -14,14 +14,14 @@ public class RemoteMovement : MonoBehaviour
     [Inject]
     IRemoteMovementController controller;
 
-    void OnEnable()
-    {
-    }
-    void Start()
+    void Awake()
     {
         socket = GetComponent<SocketIOComponent>();
         SetupSocketEventListeners();
         PassObjectsToController();
+    }
+    void Start()
+    {
     }
 
     private void PassObjectsToController()

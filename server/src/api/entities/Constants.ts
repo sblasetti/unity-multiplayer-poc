@@ -6,8 +6,8 @@ export const SOCKET_EVENTS = {
     Player: {
         New: 'player:new',
         Gone: 'player:gone',
-        Data: 'player:data',
-        InitialPosition: 'player:initial-position',
+        Join: 'player:join',
+        Welcome: 'player:welcome',
         OtherPlayers: 'player:other-players',
         LocalMove: 'player:local-movement',
         RemoteMove: 'player:remote-movement',

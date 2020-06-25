@@ -6,14 +6,45 @@ namespace Tests
 {
     public class JSONObjectBuilder : GenericBuilder<JSONObject>
     {
-        public JSONObjectBuilder(Dictionary<string, string> dict)
+        public JSONObjectBuilder()
         {
-            this.obj = new JSONObject(dict);
+            this.obj = new JSONObject();
         }
 
-        public static JSONObjectBuilder Dictionary()
+        public static JSONObjectBuilder Empty()
         {
-            return new JSONObjectBuilder(new Dictionary<string, string>());
+            return new JSONObjectBuilder();
+        }
+
+        public JSONObjectBuilder WithPayload(JSONObject obj)
+        {
+            this.obj.AddField(SOCKET_DATA_FIELDS.Payload, obj);
+            return this;
+        }
+
+        public JSONObject WrapAsPayload()
+        {
+            JSONObject wrap = new JSONObject();
+            wrap.AddField(SOCKET_DATA_FIELDS.Payload, this.obj);
+            return wrap;
+        }
+
+        public JSONObjectBuilder WithField(string field, List<JSONObject> list)
+        {
+            this.obj.AddField(field, new JSONObject(list.ToArray()));
+            return this;
+        }
+
+        public JSONObjectBuilder WithField(string field, JSONObject obj)
+        {
+            this.obj.AddField(field, obj);
+            return this;
+        }
+
+        public JSONObjectBuilder WithField(string field, string obj)
+        {
+            this.obj.AddField(field, obj);
+            return this;
         }
 
         public JSONObjectBuilder WithPlayerId(string value)
@@ -31,7 +62,7 @@ namespace Tests
 
         internal JSONObjectBuilder WithPositionObject(float x, float y)
         {
-            var posObj = Dictionary().WithPosition(x, y).Build();
+            var posObj = Empty().WithPosition(x, y).Build();
             this.obj.AddField(SOCKET_DATA_FIELDS.Position, posObj);
             return this;
         }

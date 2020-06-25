@@ -39,10 +39,10 @@ namespace Tests
             // Given
             const float horizontal = 1f;
             const float vertical = 2f;
-            var jobj = JSONObjectBuilder.Dictionary()
+            var jobj = JSONObjectBuilder.Empty()
                 .WithPlayerId("TEST_ID")
                 .WithMovementCoordinates(horizontal, vertical)
-                .Build();
+                .WrapAsPayload();
             var socketEvent = SocketIOEventBuilder.New("test").WithData(jobj).Build();
             const float time = 0.123f;
             unityTimeProxyMock.Setup(x => x.deltaTime).Returns(time);

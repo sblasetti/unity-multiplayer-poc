@@ -11,7 +11,7 @@ public interface IPlayersManagementController
     void OnOtherPlayersReceived(SocketIOEvent e);
     void OnPlayerAdded(SocketIOEvent e);
     void OnPlayerGone(SocketIOEvent e);
-    void OnPlayerInitialPosition(SocketIOEvent e);
+    void OnPlayerWelcome(SocketIOEvent e);
     void SetState(IGameState state);
     void SetPlayerPrefab(GameObject playerPrefab);
     void SetSocket(ISocketIOComponent socket);
@@ -67,13 +67,64 @@ public class PlayersManagementController : IPlayersManagementController
 
     public void OnPlayerAdded(SocketIOEvent e)
     {
-        var playerId = e.data.GetField(SOCKET_DATA_FIELDS.PlayerId).str;
+        Assert.That(e.HasPayload());
+
+        var playerId = e.GetString(SOCKET_DATA_FIELDS.PlayerId);
         if (GetRemotePlayer(playerId) != null) return;
 
-        AddPlayerFromJSONObject(e.data);
+        AddPlayerFromPayload(e.GetPayload());
     }
 
-    private void AddPlayerFromJSONObject(JSONObject jobj)
+    public void OnPlayerGone(SocketIOEvent e)
+    {
+        var playerId = e.GetString(SOCKET_DATA_FIELDS.PlayerId);
+        unityDebugProxy.Log($"{e.name} - {playerId}");
+
+        RemoveRemotePlayer(playerId);
+    }
+
+    public void OnPlayerWelcome(SocketIOEvent e)
+    {
+        Debug.Log($"welcomed, current player {(GetLocalPlayer() != null ? "set" : "null")}");
+
+        if (GetLocalPlayer() != null) return;
+
+        Assert.That(e.HasPayload());
+        Assert.That(e.HasField("x"));
+        Assert.That(e.HasField("y"));
+
+        var x = e.GetFloat("x").Value;
+        var y = e.GetFloat("y").Value;
+
+        var position = new Vector3(x, 0, y);
+        this.localPlayer = this.unityObjectProxy.Instantiate(playerPrefab, position, Quaternion.identity);
+
+        this.socket.EmitIfConnected(SOCKET_EVENTS.PlayerJoin, new JSONObject());
+    }
+
+    public void OnOtherPlayersReceived(SocketIOEvent e)
+    {
+        var data = e.GetPayload();
+        unityDebugProxy.Log($"{e.name} - {data}");
+
+        var players = data.list;
+        foreach (var player in players)
+        {
+            var playerId = player.GetField(SOCKET_DATA_FIELDS.PlayerId).str;
+            if (!state.RemotePlayerExists(playerId))
+                AddPlayerFromPayload(player);
+
+            unityDebugProxy.Log($"Added remote player {player}");
+        }
+    }
+
+    public void SendPlayerMove(float initialX, float initialY, float horizontal, float vertical)
+    {
+        var data = BuildPositionData(initialX, initialY, horizontal, vertical);
+        socket.EmitIfConnected(SOCKET_EVENTS.PlayerLocalMove, data);
+    }
+
+    private void AddPlayerFromPayload(JSONObject jobj)
     {
         var playerId = jobj.GetField(SOCKET_DATA_FIELDS.PlayerId).str;
         var posObj = jobj.GetField(SOCKET_DATA_FIELDS.Position);
@@ -81,36 +132,6 @@ public class PlayersManagementController : IPlayersManagementController
         var posY = posObj.GetField(SOCKET_DATA_FIELDS.PositionY).f;
 
         AddRemotePlayer(playerId, posX, posY);
-    }
-
-    public void OnPlayerGone(SocketIOEvent e)
-    {
-        var playerId = e.data.GetField(SOCKET_DATA_FIELDS.PlayerId).str;
-        unityDebugProxy.Log($"{e.name} - {playerId}");
-
-        RemoveRemotePlayer(playerId);
-    }
-
-    public void OnPlayerInitialPosition(SocketIOEvent e)
-    {
-        Debug.Log("position received, player: " + localPlayer);
-
-        if (localPlayer != null) return;
-
-        Assert.That(e.data.HasField("x"));
-        Assert.That(e.data.HasField("y"));
-
-        var x = e.GetFloat("x").Value;
-        var y = e.GetFloat("y").Value;
-
-        var position = new Vector3(x, 0, y);
-        this.localPlayer = this.unityObjectProxy.Instantiate(playerPrefab, position, Quaternion.identity);
-    }
-
-    public void SendPlayerMove(float initialX, float initialY, float horizontal, float vertical)
-    {
-        var data = BuildPositionData(initialX, initialY, horizontal, vertical);
-        socket.EmitIfConnected(SOCKET_EVENTS.PlayerLocalMove, data);
     }
 
     private static JSONObject BuildPositionData(float initialX, float initialY, float horizontal, float vertical)
@@ -123,22 +144,6 @@ public class PlayersManagementController : IPlayersManagementController
             {"verticalMovement", vertical.ToString()},
         };
         return new JSONObject(dict);
-    }
-
-    public void OnOtherPlayersReceived(SocketIOEvent e)
-    {
-        var data = e.data.GetField("players");
-        unityDebugProxy.Log($"{e.name} - {data}");
-
-        var players = data.list;
-        foreach (var player in players)
-        {
-            var playerId = player.GetField(SOCKET_DATA_FIELDS.PlayerId).str;
-            if (!state.RemotePlayerExists(playerId))
-                AddPlayerFromJSONObject(player);
-
-            unityDebugProxy.Log($"Added remote player {player}");
-        }
     }
 
     private GameObject CreatePlayer(string id, Vector3 position)

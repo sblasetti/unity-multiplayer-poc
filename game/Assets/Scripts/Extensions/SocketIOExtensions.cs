@@ -1,17 +1,46 @@
 using SocketIO;
 
 public static class SocketIOExtensions{
+    public static JSONObject GetField(this SocketIOEvent e, string field)
+    {
+        if (!e.HasPayload()) return null;
+        var payload = e.GetPayload();
+
+        return payload.HasField(field) ? payload.GetField(field) : null;
+    }
+
     public static string GetString(this SocketIOEvent e, string field)
     {
-        return e.data.HasField(field) ? e.data.GetField(field).str : null;
+        if (!e.HasPayload()) return null;
+        var payload = e.GetPayload();
+
+        return payload.HasField(field) ? payload.GetField(field).str : null;
     }
 
     public static float? GetFloat(this SocketIOEvent e, string field)
     {
-        if (!e.data.HasField(field)) return null;
+        if (!e.HasPayload()) return null;
+        var payload = e.GetPayload();
 
-        var jobj = e.data.GetField(field);
+        if (!payload.HasField(field)) return null;
+
+        var jobj = payload.GetField(field);
         return jobj.IsNumber ? jobj.n : float.Parse(jobj.str);
+    }
+
+    public static JSONObject GetPayload(this SocketIOEvent e)
+    {
+        return e.data.GetField(SOCKET_DATA_FIELDS.Payload);
+    }
+
+    public static bool HasPayload(this SocketIOEvent e)
+    {
+        return e.data.HasField(SOCKET_DATA_FIELDS.Payload);
+    }
+
+    public static bool HasField(this SocketIOEvent e, string field)
+    {
+        return e.HasPayload() && e.GetPayload().HasField(field);
     }
 
     public static void EmitIfConnected(this ISocketIOComponent socket, string ev, JSONObject data)
