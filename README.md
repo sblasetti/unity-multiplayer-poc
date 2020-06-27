@@ -1,8 +1,48 @@
 ﻿# Multiplayer game with Unity + Node.js
 
-PoC to test building a multiplayer 3D game.
+PoC to excercise building a Unity multiplayer game.
 
-## More information
+The **proof of concept** is built in Unity with [Extenject](https://assetstore.unity.com/packages/tools/utilities/extenject-dependency-injection-ioc-157735) as DI framework and [Moq](https://github.com/moq/moq) for mocking in unit tests.
+
+The goal is to explore having a non-Unity authoritative server built in Node.js
+
+## Flows
+
+### Player initial connection
+
+The socket sends the initial "connection" event to the server. The server calculates the initial position where to render the player and replies with a welcome message that has the position as payload. The client (game) then renders the local player.
+
+![Player Connects](/docs/events-Player Connects.png)
+
+### Player joins the game (confirms it is rendered locally)
+
+Once rendered locally the game lets the server know this. The server registers the player and then proceeds to send existing players back and to broadcast the player to those other players.
+
+![Player Joins](/docs/events-Player Joins The Game.png)
+
+### Player moves *- IN PROGRESS*
+
+The player moves locally, then this information is sent to the server for validation. The server validates the position, sends it back and also sends the confirmed position to other players. 
+
+The initiating game corrects position if it needs to and the other games render the position change for the player.
+
+![Player Joins](/docs/events-Player Moves.png)
+
+### Collisions *- NOT STARTED*
+
+TBD
+
+### Player actions: jump, shoot, etc *- NOT STARTED*
+
+TBD
+
+### Player disconnects
+
+When a player closes the game the server updates the players list and informs other games about this.
+
+![Player Joins](/docs/events-Player Disconnects.png)
+
+## Collected information
 
 ### Basics
 
