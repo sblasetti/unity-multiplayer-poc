@@ -12,13 +12,13 @@ The goal is to explore having a non-Unity authoritative server built in Node.js
 
 The socket sends the initial "connection" event to the server. The server calculates the initial position where to render the player and replies with a welcome message that has the position as payload. The client (game) then renders the local player.
 
-![Player Connects](/docs/events-Player Connects.png)
+![Player Connects](./docs/events-Player_Connects.png)
 
 ### Player joins the game (confirms it is rendered locally)
 
 Once rendered locally the game lets the server know this. The server registers the player and then proceeds to send existing players back and to broadcast the player to those other players.
 
-![Player Joins](/docs/events-Player Joins The Game.png)
+![Player Joins](./docs/events-Player_Joins_The_Game.png)
 
 ### Player moves *- IN PROGRESS*
 
@@ -26,7 +26,7 @@ The player moves locally, then this information is sent to the server for valida
 
 The initiating game corrects position if it needs to and the other games render the position change for the player.
 
-![Player Joins](/docs/events-Player Moves.png)
+![Player Joins](./docs/events-Player_Moves.png)
 
 ### Collisions *- NOT STARTED*
 
@@ -40,7 +40,7 @@ TBD
 
 When a player closes the game the server updates the players list and informs other games about this.
 
-![Player Joins](/docs/events-Player Disconnects.png)
+![Player Joins](./docs/events-Player_Disconnects.png)
 
 ## Collected information
 
