@@ -2,7 +2,7 @@
 
 PoC to excercise building a Unity multiplayer game.
 
-The **proof of concept** is built in Unity with [Extenject](https://assetstore.unity.com/packages/tools/utilities/extenject-dependency-injection-ioc-157735) as DI framework and [Moq](https://github.com/moq/moq) for mocking in unit tests.
+The **proof of concept** is built in Unity with **[Extenject](https://assetstore.unity.com/packages/tools/utilities/extenject-dependency-injection-ioc-157735)** as DI framework and **Moq** for mocking in unit tests. The server uses **Socket.IO**, is written in **TypeScript** and then transpiled via **Webpack**, uses **ESLint** and **Prettier** for linting and formatting, and uses **Jest** for unit testing.
 
 The goal is to explore having a non-Unity authoritative server built in Node.js
 
