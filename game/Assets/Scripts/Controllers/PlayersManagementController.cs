@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using ModestTree;
 using SocketIO;
 using UnityEngine;
+using Zenject;
 
 public interface IPlayersManagementController
 {
@@ -19,11 +20,18 @@ public interface IPlayersManagementController
 
 public class PlayersManagementController : IPlayersManagementController
 {
-    public PlayersManagementController(IUnityGameObjectProxy unityGameObjectProxy, IUnityObjectProxy unityObjectProxy, IUnityDebugProxy unityDebugProxy)
+    private GameObject localPlayer;
+    private readonly IUnityGameObjectProxy unityGameObjectProxy;
+    private readonly IUnityObjectProxy unityObjectProxy;
+    private readonly IUnityDebugProxy unityDebugProxy;
+    private readonly IInstantiator container;
+
+    public PlayersManagementController(IUnityGameObjectProxy unityGameObjectProxy, IUnityObjectProxy unityObjectProxy, IUnityDebugProxy unityDebugProxy, IInstantiator container)
     {
         this.unityGameObjectProxy = unityGameObjectProxy;
         this.unityObjectProxy = unityObjectProxy;
         this.unityDebugProxy = unityDebugProxy;
+        this.container = container;
     }
 
     #region Unity objects
@@ -47,11 +55,6 @@ public class PlayersManagementController : IPlayersManagementController
     }
 
     #endregion
-
-    GameObject localPlayer;
-    IUnityGameObjectProxy unityGameObjectProxy;
-    IUnityObjectProxy unityObjectProxy;
-    IUnityDebugProxy unityDebugProxy;
 
     public GameObject GetLocalPlayer()
     {
@@ -96,7 +99,7 @@ public class PlayersManagementController : IPlayersManagementController
         var y = e.GetFloat("y").Value;
 
         var position = new Vector3(x, 0, y);
-        this.localPlayer = this.unityObjectProxy.Instantiate(playerPrefab, position, Quaternion.identity);
+        this.localPlayer = CreatePlayer("local", position, false);
 
         this.socket.EmitIfConnected(SOCKET_EVENTS.PlayerJoin, new JSONObject());
     }
@@ -127,10 +130,14 @@ public class PlayersManagementController : IPlayersManagementController
         AddRemotePlayer(playerId, posX, posY);
     }
 
-    private GameObject CreatePlayer(string id, Vector3 position)
+    private GameObject CreatePlayer(string id, Vector3 position, bool isRemote = true)
     {
-        var gobj = unityObjectProxy.Instantiate(playerPrefab, position, Quaternion.identity);
+        var gobj = container.InstantiatePrefab(playerPrefab, position, Quaternion.identity, null);
         gobj.name = $"Player:{id}"; // TODO: improve
+        if (!isRemote)
+        {
+            container.InstantiateComponent<LocalMovement>(gobj);
+        }
         return gobj;
     }
 

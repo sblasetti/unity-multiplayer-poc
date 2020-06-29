@@ -26,6 +26,12 @@ namespace Game.Tests.Builders
             this.obj.AddComponent<Rigidbody>();
             return this;
         }
+
+        public GameObjectBuilder WithLocalMovement()
+        {
+            this.obj.AddComponent<LocalMovement>();
+            return this;
+        }
     }
 
 }

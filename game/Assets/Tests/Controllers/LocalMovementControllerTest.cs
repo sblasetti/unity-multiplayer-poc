@@ -33,8 +33,8 @@ namespace Game.Tests.Controllers
         {
             fakeLocalPlayer = GameObjectBuilder.New()
                 .WithRigidbody()
+                .WithLocalMovement()
                 .Build();
-            //fakeDirection = new Vector3(1.22F, 3.44F, 5.66F);
         }
 
         [SetUp]
@@ -45,21 +45,11 @@ namespace Game.Tests.Controllers
             movementCommandMock.Reset();
             rotationCommandMock.Reset();
 
-            //fakePlayerPrefab = GameObjectBuilder.New().Build();
-
             controller = new LocalMovementController(unityInputProxyMock.Object, networkControllerMock.Object, 
                 rotationCommandMock.Object, movementCommandMock.Object);
             controller.SetLocalPlayer(fakeLocalPlayer);
             controller.SetSpeed(30F);
             controller.SetRotationSpeed(40F);
-
-            //controller.SetState(gameStateMock.Object);
-
-            //socketMock = new Mock<ISocketIOComponent>();
-            //controller.SetSocket(socketMock.Object);
-
-            //socketMock.Setup(x => x.IsConnected).Returns(true);
-            //unityObjectProxyMock.Setup(x => x.Instantiate(It.IsAny<GameObject>(), It.IsAny<Vector3>(), It.IsAny<Quaternion>())).Returns(fakeLocalPlayer);
         }
 
         [Test]
@@ -76,6 +66,13 @@ namespace Game.Tests.Controllers
             Assert.AreEqual(1.23F, direction.x); // horizontal
             Assert.AreEqual(0, direction.y);
             Assert.AreEqual(4.56F, direction.z); // vertical
+        }
+
+        [Test]
+        public void PerformLocalMoveOnFixedUpdate_OnlyMoveWhenTouchingTheGround()
+        {
+            // TBD
+            Assert.Fail();
         }
 
         [Theory]

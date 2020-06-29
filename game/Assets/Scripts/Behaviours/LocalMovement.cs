@@ -9,23 +9,24 @@ public class LocalMovement : MonoBehaviour
     [Inject]
     private IPlayersManagementController playersManagementController;
 
-    public float force = 50f;
+    public float force = 10f;
     public float rotationSpeed = 100f;
     public ForceMode forceMode = ForceMode.Force;
 
     private GameObject localPlayer = null;
     private Vector3 direction = Vector3.zero;
 
-    void Awake()
+    void Start()
     {
+        localPlayer = this.gameObject;
+        direction = localPlayer.transform.forward;
+        controller.SetLocalPlayer(localPlayer);
         controller.SetSpeed(this.force);
         controller.SetRotationSpeed(this.rotationSpeed);
     }
 
     void Update()
     {
-        SetLocalPlayerReference();
-
         direction = controller.GetAxisDirection();
 
         // TODO: this is a temp way to reset player's position, remove
@@ -38,23 +39,6 @@ public class LocalMovement : MonoBehaviour
     void FixedUpdate()
     {
         controller.PerformLocalMoveOnFixedUpdate(direction);
-    }
-
-    /// <summary>
-    /// As the player is instantiated after a socket event, this assignment needs to be 
-    /// done on update.
-    /// </summary>
-    private void SetLocalPlayerReference()
-    {
-        if (localPlayer == null)
-        {
-            localPlayer = playersManagementController.GetLocalPlayer();
-            if (localPlayer != null)
-            {
-                controller.SetLocalPlayer(localPlayer);
-                direction = localPlayer.transform.forward;
-            }
-        }
     }
 
     //public void SendPlayerMove(float initialX, float initialY, float horizontal, float vertical)

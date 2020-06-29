@@ -19,6 +19,7 @@ namespace Game.Tests.Controllers
         private Mock<IUnityGameObjectProxy> unityGameObjectProxyMock = new Mock<IUnityGameObjectProxy>();
         private Mock<IUnityObjectProxy> unityObjectProxyMock = new Mock<IUnityObjectProxy>();
         private Mock<IUnityDebugProxy> unityDebugProxyMock = new Mock<IUnityDebugProxy>();
+        private Mock<IInstantiator> instantiatorMock = new Mock<IInstantiator>();
         private Mock<IGameState> gameStateMock = new Mock<IGameState>();
         private Mock<ISocketIOComponent> socketMock = null;
 
@@ -47,11 +48,12 @@ namespace Game.Tests.Controllers
             unityObjectProxyMock.Reset();
             unityGameObjectProxyMock.Reset();
             gameStateMock.Reset();
+            instantiatorMock.Reset();
 
             fakePlayerPrefab = GameObjectBuilder.New().Build();
 
             controller = new PlayersManagementController(
-                unityGameObjectProxyMock.Object, unityObjectProxyMock.Object, unityDebugProxyMock.Object);
+                unityGameObjectProxyMock.Object, unityObjectProxyMock.Object, unityDebugProxyMock.Object, instantiatorMock.Object);
             controller.SetPlayerPrefab(fakePlayerPrefab);
             controller.SetState(gameStateMock.Object);
 
@@ -59,7 +61,8 @@ namespace Game.Tests.Controllers
             controller.SetSocket(socketMock.Object);
 
             socketMock.Setup(x => x.IsConnected).Returns(true);
-            unityObjectProxyMock.Setup(x => x.Instantiate(It.IsAny<GameObject>(), It.IsAny<Vector3>(), It.IsAny<Quaternion>())).Returns(fakeLocalPlayer);
+            instantiatorMock.Setup(x => x.InstantiatePrefab(It.IsAny<GameObject>(), It.IsAny<Vector3>(), It.IsAny<Quaternion>(), null)).Returns(fakeLocalPlayer);
+            
         }
 
         [Test]
@@ -74,8 +77,7 @@ namespace Game.Tests.Controllers
 
             // Then
             var expectedPos = new Vector3(posX, 0, posY);
-            unityObjectProxyMock.Verify(x => x.Instantiate(fakePlayerPrefab, expectedPos, Quaternion.identity), Times.Once);
-            Assert.AreEqual(controller.GetLocalPlayer(), fakeLocalPlayer);
+            AssertLocalPlayerIsCreated(expectedPos);
             socketMock.Verify(x => x.Emit(SOCKET_EVENTS.PlayerJoin, It.IsAny<JSONObject>()), Times.Once);
         }
 
@@ -109,7 +111,7 @@ namespace Game.Tests.Controllers
 
             // Then
             unityGameObjectProxyMock.Verify(x => x.Find("Player:TEST_ID"), Times.Once);
-            AssertARemotePlayerIsCreatedLocally("TEST_ID", 2.2F, 3.3F);
+            AssertRemotePlayerIsCreatedLocally("TEST_ID", 2.2F, 3.3F);
         }
 
         [Test]
@@ -118,7 +120,7 @@ namespace Game.Tests.Controllers
             // Given
             var socketEvent = BuildSocketIOEventWithPlayer(SOCKET_EVENTS.PlayerNew, "TEST_ID", 2.2F, 3.3F);
             controller.OnPlayerAdded(socketEvent);
-            unityObjectProxyMock.Invocations.Clear();
+            instantiatorMock.Invocations.Clear();
             gameStateMock.Invocations.Clear();
             unityGameObjectProxyMock.Setup(x => x.Find("Player:TEST_ID")).Returns(fakeRemotePlayer);
 
@@ -200,23 +202,32 @@ namespace Game.Tests.Controllers
             return socketEvent;
         }
 
-        private void AssertARemotePlayerIsCreatedLocally(string playerId, float posX, float posY)
+        private void AssertLocalPlayerIsCreated(Vector3 expectedPos)
+        {
+            instantiatorMock.Verify(x => x.InstantiatePrefab(fakePlayerPrefab, expectedPos, Quaternion.identity, null), Times.Once);
+            instantiatorMock.Verify(x => x.InstantiateComponent<LocalMovement>(fakeLocalPlayer), Times.Once);
+            Assert.AreEqual(controller.GetLocalPlayer(), fakeLocalPlayer);
+        }
+
+        private void AssertRemotePlayerIsCreatedLocally(string playerId, float posX, float posY)
         {
             // Then: remote player created as local GameObject using player prefab
-            unityObjectProxyMock.Verify(x => x.Instantiate(fakePlayerPrefab, new Vector3(posX, 0, posY), Quaternion.identity), Times.Once);
+            instantiatorMock.Verify(x => x.InstantiatePrefab(fakePlayerPrefab, It.IsAny<Vector3>(), Quaternion.identity, null), Times.Once);
+            instantiatorMock.Verify(x => x.InstantiateComponent<LocalMovement>(fakeLocalPlayer), Times.Never);
             // Then: player added to the list of remotes
             gameStateMock.Verify(x => x.AddRemotePlayer(playerId,  posX, posY), Times.Once);
         }
 
         private void AssertRemotePlayersAreCreatedLocally(int numberOfPlayers)
         {
-            unityObjectProxyMock.Verify(x => x.Instantiate(fakePlayerPrefab, It.IsAny<Vector3>(), Quaternion.identity), Times.Exactly(numberOfPlayers));
+            instantiatorMock.Verify(x => x.InstantiatePrefab(fakePlayerPrefab, It.IsAny<Vector3>(), Quaternion.identity, null), Times.Exactly(numberOfPlayers));
+            instantiatorMock.Verify(x => x.InstantiateComponent<LocalMovement>(fakeLocalPlayer), Times.Never);
             gameStateMock.Verify(x => x.AddRemotePlayer(It.IsAny<string>(), It.IsAny<float>(), It.IsAny<float>()), Times.Exactly(numberOfPlayers));
         }
 
         private void AssertRemotePlayerIsNotCreatedLocally()
         {
-            unityObjectProxyMock.Verify(x => x.Instantiate(fakePlayerPrefab, It.IsAny<Vector3>(), Quaternion.identity), Times.Never);
+            instantiatorMock.Verify(x => x.InstantiatePrefab(fakePlayerPrefab, It.IsAny<Vector3>(), Quaternion.identity, null), Times.Never);
             gameStateMock.Verify(x => x.AddRemotePlayer(It.IsAny<string>(), It.IsAny<float>(), It.IsAny<float>()), Times.Never);
         }
 
