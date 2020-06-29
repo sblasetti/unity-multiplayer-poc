@@ -20,3 +20,9 @@ public static class SOCKET_DATA_FIELDS
     public static string PositionX = "x";
     public static string PositionY = "y";
 }
+
+public static class INPUT_NAMES
+{
+    public static string AxisHorizontal = "Horizontal";
+    public static string AxisVertical = "Vertical";
+}

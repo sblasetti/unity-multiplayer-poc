@@ -19,11 +19,6 @@ public class PlayersManagement : MonoBehaviour
         PassObjectsToController();
     }
 
-    // Start is called before the first frame update
-    void Start()
-    {
-    }
-
     private void PassObjectsToController()
     {
         // Is this the best way to use Unity related objects?
@@ -40,15 +35,5 @@ public class PlayersManagement : MonoBehaviour
         socket.On(SOCKET_EVENTS.PlayerOtherPlayers, controller.OnOtherPlayersReceived);
 
         Debug.Log("Socket configured");
-    }
-
-    public GameObject GetLocalPlayer()
-    {
-        return controller.GetLocalPlayer();
-    }
-
-    internal void SendPlayerMove(Vector3 position, float horizontal, float vertical)
-    {
-        controller.SendPlayerMove(position.x, position.y, horizontal, vertical);
     }
 }

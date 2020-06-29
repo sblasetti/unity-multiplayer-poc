@@ -4,8 +4,9 @@ using Moq;
 using System.Collections.Generic;
 using UnityEngine;
 using SocketIO;
+using Game.Tests.Builders;
 
-namespace Tests
+namespace Game.Tests.Controllers
 {
     [TestFixture]
     public class RemoteMovementControllerTest : ZenjectUnitTestFixture

@@ -1,6 +1,6 @@
 using System.Xml.Serialization;
 
-namespace Tests
+namespace Game.Tests.Builders
 {
     public class GenericBuilder<T>
     {

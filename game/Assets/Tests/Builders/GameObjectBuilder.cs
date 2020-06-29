@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Tests
+namespace Game.Tests.Builders
 {
 
     public class GameObjectBuilder : GenericBuilder<GameObject>
@@ -23,7 +23,7 @@ namespace Tests
 
         public GameObjectBuilder WithRigidbody()
         {
-            var rb = this.obj.AddComponent<Rigidbody>();
+            this.obj.AddComponent<Rigidbody>();
             return this;
         }
     }

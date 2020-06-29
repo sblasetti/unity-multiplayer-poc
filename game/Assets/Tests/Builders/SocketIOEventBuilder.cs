@@ -3,7 +3,7 @@ using System.Collections;
 using SocketIO;
 using System.Collections.Generic;
 
-namespace Tests
+namespace Game.Tests.Builders
 {
     public class SocketIOEventBuilder : GenericBuilder<SocketIOEvent>
     {

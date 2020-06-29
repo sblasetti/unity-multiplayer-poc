@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using SocketIO;
 
-namespace Tests
+namespace Game.Tests.Builders
 {
     public class JSONObjectBuilder : GenericBuilder<JSONObject>
     {

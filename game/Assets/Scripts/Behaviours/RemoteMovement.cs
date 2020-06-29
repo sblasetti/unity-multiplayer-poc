@@ -20,6 +20,7 @@ public class RemoteMovement : MonoBehaviour
         SetupSocketEventListeners();
         PassObjectsToController();
     }
+    
     void Start()
     {
     }
@@ -34,8 +35,6 @@ public class RemoteMovement : MonoBehaviour
 
     private void SetupSocketEventListeners()
     {
-        Debug.Log($"s: {socket != null} | c: {controller != null}");
         socket.On(SOCKET_EVENTS.PlayerRemoteMove, controller.OnRemotePlayerMovement);
-        Debug.Log("socket set");
     }
 }

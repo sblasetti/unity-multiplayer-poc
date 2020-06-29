@@ -15,7 +15,6 @@ public interface IPlayersManagementController
     void SetState(IGameState state);
     void SetPlayerPrefab(GameObject playerPrefab);
     void SetSocket(ISocketIOComponent socket);
-    void SendPlayerMove(float initialX, float initialY, float horizontal, float vertical);
 }
 
 public class PlayersManagementController : IPlayersManagementController
@@ -118,12 +117,6 @@ public class PlayersManagementController : IPlayersManagementController
         }
     }
 
-    public void SendPlayerMove(float initialX, float initialY, float horizontal, float vertical)
-    {
-        var data = BuildPositionData(initialX, initialY, horizontal, vertical);
-        socket.EmitIfConnected(SOCKET_EVENTS.PlayerLocalMove, data);
-    }
-
     private void AddPlayerFromPayload(JSONObject jobj)
     {
         var playerId = jobj.GetField(SOCKET_DATA_FIELDS.PlayerId).str;
@@ -132,18 +125,6 @@ public class PlayersManagementController : IPlayersManagementController
         var posY = posObj.GetField(SOCKET_DATA_FIELDS.PositionY).f;
 
         AddRemotePlayer(playerId, posX, posY);
-    }
-
-    private static JSONObject BuildPositionData(float initialX, float initialY, float horizontal, float vertical)
-    {
-        // TODO: immprove
-        var dict = new Dictionary<string, string>() {
-            {"initialX", horizontal.ToString()},
-            {"initialY", horizontal.ToString()},
-            {"horizontalMovement", horizontal.ToString()},
-            {"verticalMovement", vertical.ToString()},
-        };
-        return new JSONObject(dict);
     }
 
     private GameObject CreatePlayer(string id, Vector3 position)
