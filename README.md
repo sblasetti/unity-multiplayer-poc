@@ -1,8 +1,10 @@
 ﻿# Multiplayer game with Unity + Node.js
 
-PoC to excercise building a Unity multiplayer game.
+Proof of concept to excercise building a multiplayer game in Unity and to explore having a non-Unity authoritative server built in Node.js.
 
-The **proof of concept** is built in Unity with **[Extenject](https://assetstore.unity.com/packages/tools/utilities/extenject-dependency-injection-ioc-157735)** as DI framework and **Moq** for mocking in unit tests. The server uses **Socket.IO**, is written in **TypeScript** and then transpiled via **Webpack**, uses **ESLint** and **Prettier** for linting and formatting, and uses **Jest** for unit testing.
+The client game uses **[Extenject](https://assetstore.unity.com/packages/tools/utilities/extenject-dependency-injection-ioc-157735)** as DI framework; **[Socket.IO for Unity](https://assetstore.unity.com/packages/tools/network/socket-io-for-unity-21721)** for connection with the server; and **Moq** for mocking in unit tests. 
+
+The server uses **Socket.IO** and is written in **TypeScript** and then transpiled via **Webpack**. It uses **ESLint** and **Prettier** for linting and formatting, and uses **Jest** for unit testing.
 
 The goal is to explore having a non-Unity authoritative server built in Node.js
 
@@ -53,6 +55,7 @@ When a player closes the game the server updates the players list and informs ot
 
 - [Movement: Rigidbody vs Translate](https://www.youtube.com/watch?v=ixM2W2tPn6c)
 - [Troubleshooting: character falling over problem](https://forum.unity.com/threads/character-falling-over-problem.160027/)
+- [Rotation with Rigidbody](https://forum.unity.com/threads/can-not-move-and-rotate-at-the-same-time.734438/)
 
 ### ScriptableObjects
 

@@ -1,4 +1,5 @@
-﻿using Assets.Scripts.Controllers;
+﻿using Assets.Scripts.Commands;
+using Assets.Scripts.Controllers;
 using Assets.Scripts.Proxies;
 using Game.Tests.Builders;
 using Moq;
@@ -22,6 +23,8 @@ namespace Game.Tests.Controllers
 
         private Mock<IUnityInputProxy> unityInputProxyMock = new Mock<IUnityInputProxy>();
         private Mock<INetworkController> networkControllerMock = new Mock<INetworkController>();
+        private Mock<IRotationCommand> rotationCommandMock = new Mock<IRotationCommand>();
+        private Mock<IMovementCommand> movementCommandMock = new Mock<IMovementCommand>();
 
         private GameObject fakeLocalPlayer;
 
@@ -39,14 +42,17 @@ namespace Game.Tests.Controllers
         {
             networkControllerMock.Reset();
             unityInputProxyMock.Reset();
-            //unityObjectProxyMock.Reset();
-            //unityGameObjectProxyMock.Reset();
-            //gameStateMock.Reset();
+            movementCommandMock.Reset();
+            rotationCommandMock.Reset();
 
             //fakePlayerPrefab = GameObjectBuilder.New().Build();
 
-            controller = new LocalMovementController(unityInputProxyMock.Object, networkControllerMock.Object);
+            controller = new LocalMovementController(unityInputProxyMock.Object, networkControllerMock.Object, 
+                rotationCommandMock.Object, movementCommandMock.Object);
             controller.SetLocalPlayer(fakeLocalPlayer);
+            controller.SetSpeed(30F);
+            controller.SetRotationSpeed(40F);
+
             //controller.SetState(gameStateMock.Object);
 
             //socketMock = new Mock<ISocketIOComponent>();
@@ -76,44 +82,28 @@ namespace Game.Tests.Controllers
         public void PerformLocalMoveOnFixedUpdate_OnVerticalChange(float change)
         {
             // Given
-            var initialX = fakeLocalPlayer.transform.position.x;
-            var initialY = fakeLocalPlayer.transform.position.y;
-            var initialZ = fakeLocalPlayer.transform.position.z;
-            var fakeDirection = new Vector3(0.987F, 0, change);
+            var fakeDirection = new Vector3(0, 0, change);
 
             // When
             controller.PerformLocalMoveOnFixedUpdate(fakeDirection);
 
             // Then
-            Assert.AreEqual(initialY, fakeLocalPlayer.transform.position.y);
-            Assert.AreEqual(initialZ, fakeLocalPlayer.transform.position.z);
-            if (change != 0)
-                Assert.That(initialX != fakeLocalPlayer.transform.position.x + change);
-            else
-                Assert.That(initialX == fakeLocalPlayer.transform.position.x);
+            var times = change != 0 ? Times.Once() : Times.Never();
+            movementCommandMock.Verify(x => x.Execute(It.IsAny<MovementCommandPayload>()), times);
         }
 
         [Theory]
         public void PerformLocalMoveOnFixedUpdate_OnHorizontalChange(float change)
         {
             // Given
-            var initialX = fakeLocalPlayer.transform.rotation.x;
-            var initialY = fakeLocalPlayer.transform.rotation.y;
-            var initialZ = fakeLocalPlayer.transform.rotation.z;
-            var initialW = fakeLocalPlayer.transform.rotation.w;
-            var fakeDirection = new Vector3(change, 0, 0.987F);
+            var fakeDirection = new Vector3(change, 0, 0);
 
             // When
             controller.PerformLocalMoveOnFixedUpdate(fakeDirection);
 
             // Then
-            Assert.AreEqual(initialY, fakeLocalPlayer.transform.rotation.y);
-            Assert.AreEqual(initialZ, fakeLocalPlayer.transform.rotation.z);
-            Assert.AreEqual(initialW, fakeLocalPlayer.transform.rotation.w);
-            if (change != 0)
-                Assert.That(initialX != fakeLocalPlayer.transform.rotation.x + change);
-            else
-                Assert.That(initialX == fakeLocalPlayer.transform.rotation.x);
+            var times = change != 0 ? Times.Once() : Times.Never();
+            rotationCommandMock.Verify(x => x.Execute(It.IsAny<RotationCommandPayload>()), times);
         }
     }
 }

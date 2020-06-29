@@ -1,10 +1,12 @@
-﻿using Assets.Scripts.Proxies;
+﻿using Assets.Scripts.Commands;
+using Assets.Scripts.Proxies;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using Zenject;
 
 namespace Assets.Scripts.Controllers
 {
@@ -21,16 +23,21 @@ namespace Assets.Scripts.Controllers
     {
         private readonly IUnityInputProxy unityInputProxy;
         private readonly INetworkController networkController;
+        private readonly IRotationCommand rotationCommand;
+        private readonly IMovementCommand movementCommand;
 
         private GameObject localPlayer = null;
         private Rigidbody localPlayerRigidbody = null;
         private float speed = 0F;
         private float rotationSpeed = 0F;
 
-        public LocalMovementController(IUnityInputProxy unityInputProxy, INetworkController networkController)
+        public LocalMovementController(IUnityInputProxy unityInputProxy, INetworkController networkController, 
+            IRotationCommand rotationCommand, IMovementCommand movementCommand)
         {
             this.unityInputProxy = unityInputProxy;
             this.networkController = networkController;
+            this.rotationCommand = rotationCommand;
+            this.movementCommand = movementCommand;
         }
 
         public Vector3 GetAxisDirection()
@@ -45,32 +52,28 @@ namespace Assets.Scripts.Controllers
             var horizontal = direction.x;
             var vertical = direction.z;
 
-            #region Using physics (Rigidbody)
-
             if (vertical != 0)
             {
-                VerticalMovementWithRigidbody(vertical);
+                var payload = new MovementCommandPayload
+                {
+                    TargetTransform = localPlayer.transform,
+                    TargetRigidbody = localPlayerRigidbody,
+                    Speed = speed,
+                    VerticalChange = vertical
+                };
+                movementCommand.Execute(payload);
             }
 
             if (horizontal != 0)
             {
-                HorizontalMovementWithRigidbody(horizontal);
+                var payload = new RotationCommandPayload { 
+                    TargetTransform = localPlayer.transform,
+                    TargetRigidbody = localPlayerRigidbody,
+                    RotationSpeed = rotationSpeed,
+                    HorizontalChange = horizontal
+                };
+                rotationCommand.Execute(payload);
             }
-
-            #endregion
-
-            #region Using Transform (does not work with physics / collisions)
-
-            // if (vertical != 0) {
-            //    VerticalMovementWithTranform(vertical);
-            // }
-
-            //if (horizontal != 0)
-            //{
-            //    HorizontalMovementWithTransform(horizontal);
-            //}
-
-            #endregion
 
             if (localPlayer != null)
                 Debug.DrawRay(localPlayer.transform.position, localPlayer.transform.forward, Color.red);
@@ -80,19 +83,6 @@ namespace Assets.Scripts.Controllers
 
             //var playersMgmt = this.GetComponent<PlayersManagement>();
             //playersMgmt.SendPlayerMove(localPlayer.transform.position, horizontal, vertical);
-        }
-
-        private void HorizontalMovementWithRigidbody(float horizontal)
-        {
-            var h = horizontal * rotationSpeed * Time.deltaTime;
-            var rotation = Quaternion.Euler(0F, h, 0F);
-            localPlayerRigidbody.MoveRotation(localPlayerRigidbody.rotation * rotation);
-        }
-
-        private void HorizontalMovementWithTransform(float horizontal)
-        {
-            var h = horizontal * rotationSpeed * Time.deltaTime;
-            localPlayer.transform.Rotate(Vector3.up, h);
         }
 
         private void VerticalMovementWithRigidbody(float vertical)
