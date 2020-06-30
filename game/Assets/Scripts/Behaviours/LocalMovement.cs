@@ -6,8 +6,6 @@ public class LocalMovement : MonoBehaviour
 {
     [Inject]
     private ILocalMovementController controller;
-    [Inject]
-    private IPlayersManagementController playersManagementController;
 
     public float force = 7f;
     public float rotationSpeed = 100f;
@@ -40,22 +38,4 @@ public class LocalMovement : MonoBehaviour
     {
         controller.PerformLocalMoveOnFixedUpdate(direction);
     }
-
-    //public void SendPlayerMove(float initialX, float initialY, float horizontal, float vertical)
-    //{
-    //    var data = BuildPositionData(initialX, initialY, horizontal, vertical);
-    //    socket.EmitIfConnected(SOCKET_EVENTS.PlayerLocalMove, data);
-    //}
-
-    //private static JSONObject BuildPositionData(float initialX, float initialY, float horizontal, float vertical)
-    //{
-    //    // TODO: immprove
-    //    var dict = new Dictionary<string, string>() {
-    //        {"initialX", horizontal.ToString()},
-    //        {"initialY", horizontal.ToString()},
-    //        {"horizontalMovement", horizontal.ToString()},
-    //        {"verticalMovement", vertical.ToString()},
-    //    };
-    //    return new JSONObject(dict);
-    //}
 }

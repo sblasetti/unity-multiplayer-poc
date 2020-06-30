@@ -33,6 +33,7 @@ namespace Game.Tests.Controllers
         private Mock<IMovementCommand> movementCommandMock = new Mock<IMovementCommand>();
 
         private GameObject fakeLocalPlayer;
+        private Rigidbody fakeLocalRigidbody;
         private GameObject fakeGround;
 
         [OneTimeSetUp]
@@ -42,6 +43,7 @@ namespace Game.Tests.Controllers
                 .WithRigidbody()
                 .WithLocalMovement()
                 .Build();
+            fakeLocalRigidbody = fakeLocalPlayer.GetComponent<Rigidbody>();
 
             fakeGround = GameObjectBuilder.New()
                 .WithIsGround()
@@ -99,11 +101,7 @@ namespace Game.Tests.Controllers
         public void PerformLocalMoveOnFixedUpdate_OnHorizontalChange(float change)
         {
             // Given
-            unityPhysicsProxyMock.Setup(x => x.Raycast(It.IsAny<Vector3>(), It.IsAny<Vector3>(), It.IsAny<float>()))
-                .Returns(new RaycastResult { 
-                    Hit = true,
-                    ColliderGameObject = fakeGround
-                });
+            GivenRaycastCollidesWithObject();
             var fakeDirection = new Vector3(change, 0, 0);
 
             // When
@@ -119,11 +117,7 @@ namespace Game.Tests.Controllers
         public void PerformLocalMoveOnFixedUpdate_OnlyRotateWhenTouchingTheGround(bool grounded)
         {
             // Given
-            unityPhysicsProxyMock.Setup(x => x.Raycast(It.IsAny<Vector3>(), It.IsAny<Vector3>(), It.IsAny<float>()))
-                .Returns(new RaycastResult { 
-                    Hit = grounded,
-                    ColliderGameObject = grounded ? fakeGround : null
-                });
+            GivenRaycastCollidesWithObject(grounded);
             var fakeDirection = new Vector3(0.1F, 0, 0);
 
             // When
@@ -132,6 +126,32 @@ namespace Game.Tests.Controllers
             // Then
             var times = grounded ? Times.Once() : Times.Never();
             rotationCommandMock.Verify(x => x.Execute(It.IsAny<RotationCommandPayload>()), times);
+        }
+
+        [Theory]
+        public void PerformLocalMoveOnFixedUpdate_SendNewPositionForValidation()
+        {
+            // Given
+            GivenRaycastCollidesWithObject();
+            var fakeDirection = new Vector3(0.1F, 0, 0.3F);
+
+            // When
+            controller.PerformLocalMoveOnFixedUpdate(fakeDirection);
+
+            // Then
+            movementCommandMock.Verify(x => x.Execute(It.IsAny<MovementCommandPayload>()), Times.Once);
+            rotationCommandMock.Verify(x => x.Execute(It.IsAny<RotationCommandPayload>()), Times.Once);
+            networkControllerMock.Verify(x => x.SendLocalPositionChange(fakeDirection.z, fakeDirection.x), Times.Once);
+        }
+
+        private void GivenRaycastCollidesWithObject(bool hit = true)
+        {
+            unityPhysicsProxyMock.Setup(x => x.Raycast(It.IsAny<Vector3>(), It.IsAny<Vector3>(), It.IsAny<float>()))
+                .Returns(new RaycastResult
+                {
+                    Hit = hit,
+                    ColliderGameObject = hit ? fakeGround : null
+                });
         }
     }
 }

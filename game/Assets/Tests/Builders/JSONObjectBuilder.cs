@@ -55,8 +55,8 @@ namespace Game.Tests.Builders
 
         internal JSONObjectBuilder WithMovementCoordinates(float horizontal, float vertical)
         {
-            this.obj.AddField(SOCKET_DATA_FIELDS.HorizontalMovement, horizontal.ToString());
-            this.obj.AddField(SOCKET_DATA_FIELDS.VerticalMovement, vertical.ToString());
+            this.obj.AddField(SOCKET_DATA_FIELDS.DirectionChange, horizontal.ToString());
+            this.obj.AddField(SOCKET_DATA_FIELDS.DistanceChange, vertical.ToString());
             return this;
         }
 

@@ -40,8 +40,8 @@ public class RemoteMovementController : IRemoteMovementController
         var playerId = e.GetString(SOCKET_DATA_FIELDS.PlayerId);
         var player = unityGameObjectProxy.Find($"Player:{playerId}");
 
-        var horizontal = e.GetFloat(SOCKET_DATA_FIELDS.HorizontalMovement) ?? 0;
-        var vertical = e.GetFloat(SOCKET_DATA_FIELDS.VerticalMovement) ?? 0;
+        var horizontal = e.GetFloat(SOCKET_DATA_FIELDS.DirectionChange) ?? 0;
+        var vertical = e.GetFloat(SOCKET_DATA_FIELDS.DistanceChange) ?? 0;
 
         if (vertical != 0)
         {

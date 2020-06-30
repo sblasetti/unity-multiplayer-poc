@@ -85,8 +85,7 @@ namespace Assets.Scripts.Controllers
             if (horizontal == 0 && vertical == 0)
                 return;
 
-            //var playersMgmt = this.GetComponent<PlayersManagement>();
-            //playersMgmt.SendPlayerMove(localPlayer.transform.position, horizontal, vertical);
+            networkController.SendLocalPositionChange(vertical, horizontal);
         }
 
         private bool IsGrounded()

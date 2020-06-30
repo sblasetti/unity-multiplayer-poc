@@ -14,8 +14,8 @@ public static class SOCKET_DATA_FIELDS
 {
     public static string Payload = "payload";
     public static string PlayerId = "id";
-    public static string HorizontalMovement = "horizontal";
-    public static string VerticalMovement = "vertical";
+    public static string DirectionChange = "horizontal";
+    public static string DistanceChange = "vertical";
     public static string Position = "position";
     public static string PositionX = "x";
     public static string PositionY = "y";
