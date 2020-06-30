@@ -9,7 +9,7 @@ public class LocalMovement : MonoBehaviour
     [Inject]
     private IPlayersManagementController playersManagementController;
 
-    public float force = 10f;
+    public float force = 7f;
     public float rotationSpeed = 100f;
     public ForceMode forceMode = ForceMode.Force;
 

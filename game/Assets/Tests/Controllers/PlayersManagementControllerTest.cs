@@ -12,6 +12,7 @@ namespace Game.Tests.Controllers
     [TestFixture]
     public class PlayersManagementControllerTest : ZenjectUnitTestFixture
     {
+        private const float INITIAL_POSITION_Y = 0.5F;
         private IPlayersManagementController controller;
         private GameObject fakePlayerPrefab = null;
         private GameObject fakeLocalPlayer = null;
@@ -76,7 +77,7 @@ namespace Game.Tests.Controllers
             controller.OnPlayerWelcome(socketEvent);
 
             // Then
-            var expectedPos = new Vector3(posX, 0, posY);
+            var expectedPos = new Vector3(posX, INITIAL_POSITION_Y, posY);
             AssertLocalPlayerIsCreated(expectedPos);
             socketMock.Verify(x => x.Emit(SOCKET_EVENTS.PlayerJoin, It.IsAny<JSONObject>()), Times.Once);
         }

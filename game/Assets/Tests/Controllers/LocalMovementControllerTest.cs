@@ -19,14 +19,21 @@ namespace Game.Tests.Controllers
         [Datapoints]
         private float[] directionChange = new float[] { -0.123F, 0F, 0.123F };
 
+        [Datapoints]
+        private bool[] grounded = new bool[] { true, false };
+
+        private delegate void RaycastDelegate(Vector3 v1, Vector3 v2, out RaycastHit h, float f);
+
         private ILocalMovementController controller;
 
         private Mock<IUnityInputProxy> unityInputProxyMock = new Mock<IUnityInputProxy>();
+        private Mock<IUnityPhysicsProxy> unityPhysicsProxyMock = new Mock<IUnityPhysicsProxy>();
         private Mock<INetworkController> networkControllerMock = new Mock<INetworkController>();
         private Mock<IRotationCommand> rotationCommandMock = new Mock<IRotationCommand>();
         private Mock<IMovementCommand> movementCommandMock = new Mock<IMovementCommand>();
 
         private GameObject fakeLocalPlayer;
+        private GameObject fakeGround;
 
         [OneTimeSetUp]
         public void OneTimeSetUp()
@@ -35,6 +42,10 @@ namespace Game.Tests.Controllers
                 .WithRigidbody()
                 .WithLocalMovement()
                 .Build();
+
+            fakeGround = GameObjectBuilder.New()
+                .WithIsGround()
+                .Build();
         }
 
         [SetUp]
@@ -42,11 +53,12 @@ namespace Game.Tests.Controllers
         {
             networkControllerMock.Reset();
             unityInputProxyMock.Reset();
+            unityPhysicsProxyMock.Reset();
             movementCommandMock.Reset();
             rotationCommandMock.Reset();
 
             controller = new LocalMovementController(unityInputProxyMock.Object, networkControllerMock.Object, 
-                rotationCommandMock.Object, movementCommandMock.Object);
+                rotationCommandMock.Object, movementCommandMock.Object, unityPhysicsProxyMock.Object);
             controller.SetLocalPlayer(fakeLocalPlayer);
             controller.SetSpeed(30F);
             controller.SetRotationSpeed(40F);
@@ -68,13 +80,6 @@ namespace Game.Tests.Controllers
             Assert.AreEqual(4.56F, direction.z); // vertical
         }
 
-        [Test]
-        public void PerformLocalMoveOnFixedUpdate_OnlyMoveWhenTouchingTheGround()
-        {
-            // TBD
-            Assert.Fail();
-        }
-
         [Theory]
         public void PerformLocalMoveOnFixedUpdate_OnVerticalChange(float change)
         {
@@ -87,12 +92,18 @@ namespace Game.Tests.Controllers
             // Then
             var times = change != 0 ? Times.Once() : Times.Never();
             movementCommandMock.Verify(x => x.Execute(It.IsAny<MovementCommandPayload>()), times);
+            unityPhysicsProxyMock.Verify(x => x.Raycast(It.IsAny<Vector3>(), It.IsAny<Vector3>(), It.IsAny<float>()), Times.Never);
         }
 
         [Theory]
         public void PerformLocalMoveOnFixedUpdate_OnHorizontalChange(float change)
         {
             // Given
+            unityPhysicsProxyMock.Setup(x => x.Raycast(It.IsAny<Vector3>(), It.IsAny<Vector3>(), It.IsAny<float>()))
+                .Returns(new RaycastResult { 
+                    Hit = true,
+                    ColliderGameObject = fakeGround
+                });
             var fakeDirection = new Vector3(change, 0, 0);
 
             // When
@@ -100,6 +111,26 @@ namespace Game.Tests.Controllers
 
             // Then
             var times = change != 0 ? Times.Once() : Times.Never();
+            rotationCommandMock.Verify(x => x.Execute(It.IsAny<RotationCommandPayload>()), times);
+            unityPhysicsProxyMock.Verify(x => x.Raycast(It.IsAny<Vector3>(), It.IsAny<Vector3>(), It.IsAny<float>()), times);
+        }
+
+        [Theory]
+        public void PerformLocalMoveOnFixedUpdate_OnlyRotateWhenTouchingTheGround(bool grounded)
+        {
+            // Given
+            unityPhysicsProxyMock.Setup(x => x.Raycast(It.IsAny<Vector3>(), It.IsAny<Vector3>(), It.IsAny<float>()))
+                .Returns(new RaycastResult { 
+                    Hit = grounded,
+                    ColliderGameObject = grounded ? fakeGround : null
+                });
+            var fakeDirection = new Vector3(0.1F, 0, 0);
+
+            // When
+            controller.PerformLocalMoveOnFixedUpdate(fakeDirection);
+
+            // Then
+            var times = grounded ? Times.Once() : Times.Never();
             rotationCommandMock.Verify(x => x.Execute(It.IsAny<RotationCommandPayload>()), times);
         }
     }

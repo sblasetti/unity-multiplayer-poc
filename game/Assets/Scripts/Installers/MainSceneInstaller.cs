@@ -36,5 +36,6 @@ public class MainSceneInstaller : MonoInstaller<MainSceneInstaller>
         Container.Bind<IUnityDebugProxy>().To<RealUnityDebugProxy>().AsSingle();
         Container.Bind<IUnityTimeProxy>().To<RealUnityTimeProxy>().AsSingle();
         Container.Bind<IUnityInputProxy>().To<RealUnityInputProxy>().AsSingle();
+        Container.Bind<IUnityPhysicsProxy>().To<RealUnityPhysicsProxy>().AsSingle();
     }
 }

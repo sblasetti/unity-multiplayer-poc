@@ -1,5 +1,6 @@
 ﻿using Assets.Scripts.Commands;
 using Assets.Scripts.Proxies;
+using Moq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,19 +23,22 @@ namespace Assets.Scripts.Controllers
     public class LocalMovementController : ILocalMovementController
     {
         private readonly IUnityInputProxy unityInputProxy;
+        private readonly IUnityPhysicsProxy unityPhysicsProxy;
         private readonly INetworkController networkController;
         private readonly IRotationCommand rotationCommand;
         private readonly IMovementCommand movementCommand;
 
         private GameObject localPlayer = null;
         private Rigidbody localPlayerRigidbody = null;
+        private float groundTreshold = 0.6F;
         private float speed = 0F;
         private float rotationSpeed = 0F;
 
         public LocalMovementController(IUnityInputProxy unityInputProxy, INetworkController networkController, 
-            IRotationCommand rotationCommand, IMovementCommand movementCommand)
+            IRotationCommand rotationCommand, IMovementCommand movementCommand, IUnityPhysicsProxy unityPhysicsProxy)
         {
             this.unityInputProxy = unityInputProxy;
+            this.unityPhysicsProxy = unityPhysicsProxy;
             this.networkController = networkController;
             this.rotationCommand = rotationCommand;
             this.movementCommand = movementCommand;
@@ -64,7 +68,7 @@ namespace Assets.Scripts.Controllers
                 movementCommand.Execute(payload);
             }
 
-            if (horizontal != 0)
+            if (horizontal != 0 && IsGrounded())
             {
                 var payload = new RotationCommandPayload { 
                     TargetTransform = localPlayer.transform,
@@ -85,18 +89,14 @@ namespace Assets.Scripts.Controllers
             //playersMgmt.SendPlayerMove(localPlayer.transform.position, horizontal, vertical);
         }
 
-        private void VerticalMovementWithRigidbody(float vertical)
+        private bool IsGrounded()
         {
-            var v = vertical * speed * Time.deltaTime;
-            // rb.AddForce(localPlayer.transform.forward * v, forceMode);
-            // rb.velocity = localPlayer.transform.forward * vertical * force;
-            localPlayerRigidbody.MovePosition(localPlayer.transform.position + (localPlayer.transform.forward * v));
-        }
+            Debug.DrawRay(localPlayer.transform.position, Vector3.down, Color.green);
+            var res = unityPhysicsProxy.Raycast(localPlayer.transform.position, Vector3.down, groundTreshold);
+            if (!res.Hit) return false;
 
-        private void VerticalMovementWithTransform(float vertical)
-        {
-            var v = vertical * speed * Time.deltaTime;
-            localPlayer.transform.Translate(Vector3.forward * v);
+            var colliderObject = res.ColliderGameObject;
+            return colliderObject != null && (colliderObject.GetComponent<IsGround>() != null || colliderObject.GetComponentInParent<IsGround>() != null);
         }
 
         public void SetLocalPlayer(GameObject player)

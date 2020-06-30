@@ -62,9 +62,10 @@ When a player closes the game the server updates the players list and informs ot
 - [SO basics](https://www.youtube.com/watch?v=aPXvoWVabPY)
 - [Using SO for game state](https://www.youtube.com/watch?v=55eB8_CctAM)
 
-### Object identification
+### Objects detection
 
 - [Do you use tags?](https://forum.unity.com/threads/do-you-use-tags.617119/)
+- [Check if object is grounded](https://forum.unity.com/threads/check-if-character-is-grounded.243148/)
 
 ### Unity + Socket.IO
 

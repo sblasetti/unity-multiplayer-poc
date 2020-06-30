@@ -32,6 +32,12 @@ namespace Game.Tests.Builders
             this.obj.AddComponent<LocalMovement>();
             return this;
         }
+
+        public GameObjectBuilder WithIsGround()
+        {
+            this.obj.AddComponent<IsGround>();
+            return this;
+        }
     }
 
 }

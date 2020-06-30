@@ -98,7 +98,7 @@ public class PlayersManagementController : IPlayersManagementController
         var x = e.GetFloat("x").Value;
         var y = e.GetFloat("y").Value;
 
-        var position = new Vector3(x, 0, y);
+        var position = new Vector3(x, 0.5F, y);
         this.localPlayer = CreatePlayer("local", position, false);
 
         this.socket.EmitIfConnected(SOCKET_EVENTS.PlayerJoin, new JSONObject());
