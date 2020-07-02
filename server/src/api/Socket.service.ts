@@ -1,4 +1,4 @@
-import { apiService } from './Api.service';
+import { logicService } from './Logic.service';
 import { SOCKET_EVENTS } from './entities/Constants';
 import { newPlayer } from './entities/PlayerBuilder';
 import { buildPayload } from './entities/PayloadBuilder';
@@ -11,11 +11,11 @@ export function OnSocketConnection(socket: SocketIO.Socket): void {
     logMessage('new connection', socket);
 
     // If socket already registered, exit
-    const otherPlayers = apiService.getPlayers();
+    const otherPlayers = logicService.getPlayers();
     if (otherPlayers.some((x) => x.id === socket.id)) return;
 
     // Define position
-    const position = apiService.calculateInitialPosition();
+    const position = logicService.calculateInitialPosition();
 
     // Send initial position to new player
     socket.emit(SOCKET_EVENTS.Player.Welcome, buildPayload(position));
@@ -25,7 +25,7 @@ export function OnSocketConnection(socket: SocketIO.Socket): void {
 export function OnPlayerJoin(socket: SocketIO.Socket, data: any) {
     logMessage('player join: ' + data, socket);
 
-    const otherPlayers = apiService.getPlayers();
+    const otherPlayers = logicService.getPlayers();
     logMessage(`other players count: ${otherPlayers.length}`, socket);
 
     // If player already registered, exit
@@ -33,7 +33,7 @@ export function OnPlayerJoin(socket: SocketIO.Socket, data: any) {
 
     // Register new player
     const player = newPlayer(socket.id);
-    apiService.addPlayer(player);
+    logicService.addPlayer(player);
 
     // Only communicate the new player if there are other players
     if (!otherPlayers.length) return;
@@ -55,7 +55,7 @@ export function OnLocalPlayerMovement(socket: SocketIO.Socket, data: Position & 
 }
 
 export function OnSocketDisconnection(socket: SocketIO.Socket): void {
-    apiService.removePlayer(socket.id);
+    logicService.removePlayer(socket.id);
     socket.broadcast.emit(SOCKET_EVENTS.Player.Gone, buildPayload({ id: socket.id }));
     logMessage('connection ended', socket);
 }

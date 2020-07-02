@@ -1,4 +1,4 @@
-interface ApiService {
+interface LogicService {
     calculateInitialPosition: () => MapCoordinates;
     init: () => void;
     getPlayers: () => Player[];
@@ -6,7 +6,7 @@ interface ApiService {
     removePlayer: (id: string) => void;
 }
 
-export const apiService = (function apiService(): ApiService {
+export const logicService = (function logicService(): LogicService {
     let players: Player[] = [];
 
     function init(): void {
