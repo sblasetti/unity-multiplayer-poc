@@ -1,4 +1,5 @@
-﻿using SocketIO;
+﻿using Assets.Scripts.Builders;
+using SocketIO;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,30 +18,30 @@ namespace Assets.Scripts.Controllers
     public class NetworkController : INetworkController
     {
         private ISocketIOComponent socket;
+        private IGameEventBuilder eventPayloadBuilder;
+
+        public NetworkController(IGameEventBuilder eventPayloadBuilder)
+        {
+            this.eventPayloadBuilder = eventPayloadBuilder;
+        }
 
         public void SendLocalPositionChange(float distanceChange, float directionChange)
         {
             if (socket != null)
             {
-                var data = BuildPositionData(directionChange, distanceChange);
-                socket.EmitIfConnected(SOCKET_EVENTS.PlayerLocalMove, data);
+                var gameEvent = eventPayloadBuilder.BuildPlayerLocalMove(distanceChange, directionChange);
+                Send(gameEvent);
             }
-        }
-
-        private static JSONObject BuildPositionData(float direction, float distance)
-        {
-            // TODO: improve
-            var payload = new JSONObject();
-            payload.AddField(SOCKET_DATA_FIELDS.DirectionChange, direction);
-            payload.AddField(SOCKET_DATA_FIELDS.DistanceChange, distance);
-            var jobj = new JSONObject();
-            jobj.AddField(SOCKET_DATA_FIELDS.Payload, payload);
-            return jobj;
         }
 
         public void SetSocket(ISocketIOComponent socketIOComponent)
         {
             this.socket = socketIOComponent;
+        }
+
+        private void Send(GameEvent e)
+        {
+            socket.EmitIfConnected(e.Name, e.Payload);
         }
     }
 }

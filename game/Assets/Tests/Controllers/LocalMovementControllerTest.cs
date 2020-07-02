@@ -19,9 +19,6 @@ namespace Game.Tests.Controllers
         [Datapoints]
         private float[] directionChange = new float[] { -0.123F, 0F, 0.123F };
 
-        [Datapoints]
-        private bool[] grounded = new bool[] { true, false };
-
         private delegate void RaycastDelegate(Vector3 v1, Vector3 v2, out RaycastHit h, float f);
 
         private ILocalMovementController controller;
