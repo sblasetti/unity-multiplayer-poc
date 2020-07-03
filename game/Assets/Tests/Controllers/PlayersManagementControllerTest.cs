@@ -196,7 +196,7 @@ namespace Game.Tests.Controllers
                 .WithPosition(posX, posY)
                 .WrapAsPayload();
 
-            var socketEvent = SocketIOEventBuilder.Empty(SOCKET_EVENTS.PlayerWelcome)
+            var socketEvent = SocketIOEventBuilder.Empty(SOCKET_EVENTS.ServerWelcome)
                 .WithData(data)
                 .Build();
 

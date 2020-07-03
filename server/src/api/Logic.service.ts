@@ -1,9 +1,12 @@
 interface LogicService {
+    calculateMovement: (player: Player, change: PlayerMovement) => MovementValidationResult;
     calculateInitialPosition: () => MapCoordinates;
     init: () => void;
     getPlayers: () => Player[];
+    getPlayer: (id: string) => Player | undefined;
     addPlayer: (data: Player) => void;
     removePlayer: (id: string) => void;
+    updatePlayerPosition: (id: string, position: MapCoordinates) => void;
 }
 
 export const logicService = (function logicService(): LogicService {
@@ -29,19 +32,35 @@ export const logicService = (function logicService(): LogicService {
         return players;
     }
 
-    function calculateInitialPosition() : MapCoordinates {
+    function getPlayer(id: string): Player | undefined {
+        const player = players.find((val) => val.id !== id);
+        return player;
+    }
+
+    function calculateInitialPosition(): MapCoordinates {
         return {
             x: 0,
             y: 0,
-            z: 0
+            z: 0,
         };
     }
 
+    function calculateMovement(player: Player, change: PlayerMovement): MovementValidationResult {
+        return {
+            position: player.position,
+        };
+    }
+
+    function updatePlayerPosition(): void {}
+
     return {
         init,
-        addPlayer,
         getPlayers,
+        getPlayer,
+        addPlayer,
         removePlayer,
-        calculateInitialPosition
+        updatePlayerPosition,
+        calculateInitialPosition,
+        calculateMovement,
     };
 })();

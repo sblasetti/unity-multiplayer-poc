@@ -1,3 +1,4 @@
+using Assets.Scripts.Builders;
 using Assets.Scripts.Commands;
 using Assets.Scripts.Controllers;
 using Assets.Scripts.Proxies;
@@ -13,6 +14,12 @@ public class MainSceneInstaller : MonoInstaller<MainSceneInstaller>
         InstallProxies();
         InstallControllers();
         InstallCommands();
+        InstallBuilders();
+    }
+
+    private void InstallBuilders()
+    {
+        Container.Bind<IGameEventBuilder>().To<GameEventBuilder>().AsSingle();
     }
 
     private void InstallCommands()

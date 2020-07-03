@@ -1,7 +1,7 @@
 import { logicService } from './Logic.service';
 import { SOCKET_EVENTS } from './entities/Constants';
 import { newPlayer } from './entities/PlayerBuilder';
-import { buildPayload } from './entities/PayloadBuilder';
+import { buildPayload, buildLocalMoveValidationPayload, buildRemoteMove } from './entities/PayloadBuilder';
 
 function logMessage(msg: string, socket: SocketIO.Socket): void {
     console.log(`[${socket.id}] ${msg}`);
@@ -18,7 +18,7 @@ export function OnSocketConnection(socket: SocketIO.Socket): void {
     const position = logicService.calculateInitialPosition();
 
     // Send initial position to new player
-    socket.emit(SOCKET_EVENTS.Player.Welcome, buildPayload(position));
+    socket.emit(SOCKET_EVENTS.Server.Welcome, buildPayload(position));
     logMessage('sent position to new player', socket);
 }
 
@@ -37,7 +37,7 @@ export function OnPlayerJoin(socket: SocketIO.Socket, data: any) {
 
     // Only communicate the new player if there are other players
     if (!otherPlayers.length) return;
-    
+
     socket.emit(SOCKET_EVENTS.Player.OtherPlayers, buildPayload(otherPlayers));
     logMessage('sent other players to new player', socket);
 
@@ -45,13 +45,42 @@ export function OnPlayerJoin(socket: SocketIO.Socket, data: any) {
     logMessage('sent new player to others', socket);
 }
 
-export function OnLocalPlayerMovement(socket: SocketIO.Socket, data: Position & Movement): void {
+export function OnPlayerLocalMovement(socket: SocketIO.Socket, data: PlayerId & PlayerMovement): void {
     logMessage('player local move ' + JSON.stringify(data), socket);
-    socket.broadcast.emit(SOCKET_EVENTS.Player.RemoteMove, buildPayload({
-        id: socket.id,
-        horizontal: data.horizontalMovement,
-        vertical: data.verticalMovement,
-    }));
+
+    const player = getPlayerById(data);
+    if (!player) return;
+
+    const validationResult = validatePlayerLocalMovement(data, player);
+    replyWithLocalMovementValidationResult(socket, validationResult);
+    updatePlayerPositionOnServer(player, validationResult);
+    broadcastPlayerPositionToOthers(socket, player, validationResult);
+}
+
+function broadcastPlayerPositionToOthers(
+    socket: SocketIO.Socket,
+    player: Player,
+    validationResult: MovementValidationResult,
+) {
+    socket.broadcast.emit(SOCKET_EVENTS.Player.RemoteMove, buildRemoteMove(player.id, validationResult.position));
+}
+
+function updatePlayerPositionOnServer(player: Player, validationResult: MovementValidationResult) {
+    logicService.updatePlayerPosition(player.id, validationResult.position);
+}
+
+function replyWithLocalMovementValidationResult(socket: SocketIO.Socket, response: MovementValidationResult) {
+    socket.emit(SOCKET_EVENTS.Server.LocalMoveValidation, buildLocalMoveValidationPayload(true, response.position));
+}
+
+function validatePlayerLocalMovement(data: PlayerMovement, player: Player) {
+    const { horizontal, vertical } = data;
+    const response = logicService.calculateMovement(player, { horizontal, vertical });
+    return response;
+}
+
+function getPlayerById(data: PlayerId & PlayerMovement) {
+    return logicService.getPlayer(data.playerId);
 }
 
 export function OnSocketDisconnection(socket: SocketIO.Socket): void {

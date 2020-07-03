@@ -29,7 +29,7 @@ public class PlayersManagement : MonoBehaviour
 
     private void SetupSocketEventListeners()
     {
-        socket.On(SOCKET_EVENTS.PlayerWelcome, controller.OnPlayerWelcome);
+        socket.On(SOCKET_EVENTS.ServerWelcome, controller.OnPlayerWelcome);
         socket.On(SOCKET_EVENTS.PlayerNew, controller.OnPlayerAdded);
         socket.On(SOCKET_EVENTS.PlayerGone, controller.OnPlayerGone);
         socket.On(SOCKET_EVENTS.PlayerOtherPlayers, controller.OnOtherPlayersReceived);

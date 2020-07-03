@@ -1,9 +1,10 @@
-export function newPlayer(id: string): Player {
+export function newPlayer(id: string, x: number = 0, y: number = 0, z: number = 0): Player {
     return {
         id,
         position: {
-            x: 0,
-            y: 0,
+            x,
+            y,
+            z,
         },
     };
 }

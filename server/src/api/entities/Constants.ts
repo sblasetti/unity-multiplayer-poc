@@ -7,9 +7,12 @@ export const SOCKET_EVENTS = {
         New: 'player:new',
         Gone: 'player:gone',
         Join: 'player:join',
-        Welcome: 'player:welcome',
         OtherPlayers: 'player:other-players',
         LocalMove: 'player:local-movement',
         RemoteMove: 'player:remote-movement',
+    },
+    Server: {
+        Welcome: 'server:welcome',
+        LocalMoveValidation: 'server:local-movement-validation',
     },
 };

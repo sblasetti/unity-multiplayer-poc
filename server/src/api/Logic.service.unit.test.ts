@@ -1,50 +1,89 @@
 import { logicService } from './Logic.service';
 
 describe('LogicService', () => {
-    const playerData = { id: 'SOME_ID', position: { x: 1, y: 2 } };
-    const zeroPosition = { x: 0, y: 0 };
+    const fakePlayer = { id: 'SOME_ID', position: { x: 1, y: 2, z: 3 } };
+    const zeroPosition = { x: 0, y: 0, z: 0 };
 
     beforeEach(() => {
         logicService.init();
     });
 
     it('Add a new player', () => {
-        // Given user ID not in the list
-        expect(logicService.getPlayers()).not.toContainEqual(playerData);
+        givenPlayerNotInTheServer(fakePlayer);
 
-        // When adding the user
-        logicService.addPlayer(playerData);
+        whenAddingThePlayer(fakePlayer);
 
-        // Then the user is added
-        expect(logicService.getPlayers()).toContainEqual(playerData);
+        thenPlayerIsAddedToTheServer(fakePlayer);
     });
 
     it('Error when adding a player twice', () => {
-        // Given a player in the list
-        logicService.addPlayer(playerData);
-        expect(logicService.getPlayers()).toContainEqual(playerData);
+        givenPlayerAlreadyInTheServer(fakePlayer);
 
-        // When adding another user with the same ID
-        // Then throw error with message
-        expect(() => {
+        const whenAddingAnotherPlayerWithTheSameId = () => {
             const anotherPlayer = { id: 'SOME_ID', position: zeroPosition };
             logicService.addPlayer(anotherPlayer);
-        }).toThrowError("Player 'SOME_ID' already exists.");
+        };
+
+        thenThrowDuplicatePlayerError(whenAddingAnotherPlayerWithTheSameId);
     });
 
     it('Delete a player', () => {
+        givenThreePlayersInTheServer(zeroPosition);
+
+        whenRemovingPlayer2();
+
+        thenOnlyPlayersOneAndThreeAreInTheServer(zeroPosition);
+    });
+
+    it('Valid local movement', () => {
         // Given
-        logicService.addPlayer({ id: 'P1', position: zeroPosition });
-        logicService.addPlayer({ id: 'P2', position: zeroPosition });
-        logicService.addPlayer({ id: 'P3', position: zeroPosition });
-        expect(logicService.getPlayers()).toHaveLength(3);
+        const fakeMovement: PlayerMovement = {
+            horizontal: 0.98,
+            vertical: 0.2,
+        };
 
         // When
-        logicService.removePlayer('P2');
+        const result = logicService.calculateMovement(fakePlayer, fakeMovement);
 
         // Then
-        const players = logicService.getPlayers();
-        expect(players).toHaveLength(2);
-        expect(players).not.toContainEqual({ id: 'P2', position: zeroPosition });
+        expect(result.position).toBe({});
     });
 });
+
+function thenOnlyPlayersOneAndThreeAreInTheServer(zeroPosition: { x: number; y: number; z: number }) {
+    const players = logicService.getPlayers();
+    expect(players).toHaveLength(2);
+    expect(players).not.toContainEqual({ id: 'P2', position: zeroPosition });
+}
+
+function whenRemovingPlayer2() {
+    logicService.removePlayer('P2');
+}
+
+function givenThreePlayersInTheServer(zeroPosition: { x: number; y: number; z: number }) {
+    logicService.addPlayer({ id: 'P1', position: zeroPosition });
+    logicService.addPlayer({ id: 'P2', position: zeroPosition });
+    logicService.addPlayer({ id: 'P3', position: zeroPosition });
+    expect(logicService.getPlayers()).toHaveLength(3);
+}
+
+function thenThrowDuplicatePlayerError(whenAddingAnotherPlayerWithTheSameId: () => void) {
+    expect(whenAddingAnotherPlayerWithTheSameId).toThrowError("Player 'SOME_ID' already exists.");
+}
+
+function givenPlayerAlreadyInTheServer(playerData: { id: string; position: { x: number; y: number; z: number } }) {
+    logicService.addPlayer(playerData);
+    expect(logicService.getPlayers()).toContainEqual(playerData);
+}
+
+function thenPlayerIsAddedToTheServer(playerData: { id: string; position: { x: number; y: number; z: number } }) {
+    expect(logicService.getPlayers()).toContainEqual(playerData);
+}
+
+function whenAddingThePlayer(playerData: { id: string; position: { x: number; y: number; z: number } }) {
+    logicService.addPlayer(playerData);
+}
+
+function givenPlayerNotInTheServer(playerData: { id: string; position: { x: number; y: number; z: number } }) {
+    expect(logicService.getPlayers()).not.toContainEqual(playerData);
+}
