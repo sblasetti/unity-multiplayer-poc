@@ -1,0 +1,3 @@
+interface PlayerId {
+    playerId: string;
+}

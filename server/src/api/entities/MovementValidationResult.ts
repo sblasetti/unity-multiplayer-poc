@@ -1,0 +1,3 @@
+interface MovementValidationResult {
+    position: MapCoordinates;
+}

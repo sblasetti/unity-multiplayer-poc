@@ -1,3 +1,5 @@
+import { Vector3, Vec2, Euler } from 'three';
+
 interface LogicService {
     calculateMovement: (player: Player, change: PlayerMovement) => MovementValidationResult;
     calculateInitialPosition: () => MapCoordinates;
@@ -11,6 +13,11 @@ interface LogicService {
 
 export const logicService = (function logicService(): LogicService {
     let players: Player[] = [];
+    const characterSpecs = {
+        speed: 10,
+        rotationSpeed: 100,
+    };
+    const mapDimensions: Vec2 = { x: 20, y: 20 };
 
     function init(): void {
         players = [];
@@ -46,6 +53,27 @@ export const logicService = (function logicService(): LogicService {
     }
 
     function calculateMovement(player: Player, change: PlayerMovement): MovementValidationResult {
+        /*
+        How to validate?
+        We need the new position to check if it's valid or not
+        - validate player is still within the limits of the map
+        - validate the distance change is not too high
+
+        a) if we receive distance & direction changes, we have to calculate rotation (need deltaTime)
+        b) we could receive the change of direction in degrees
+        c) if we receive new position, we need the time of the last change of position
+        */
+        const degreesY = change.horizontal * characterSpecs.rotationSpeed * deltaTime;
+        const euler = new Euler(0, degreesY, 0);
+
+        const {
+            position: { x, y, z },
+        } = player;
+        const initialPosition = new Vector3(x, y, z);
+        initialPosition.applyEuler(euler);
+
+        const newPosition = initialPosition.add();
+
         return {
             position: player.position,
         };
