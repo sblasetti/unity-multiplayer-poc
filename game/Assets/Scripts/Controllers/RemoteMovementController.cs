@@ -1,3 +1,4 @@
+using Assets.Scripts.Commands;
 using SocketIO;
 using UnityEngine;
 
@@ -11,13 +12,11 @@ public interface IRemoteMovementController
 
 public class RemoteMovementController : IRemoteMovementController
 {
-    private IUnityGameObjectProxy unityGameObjectProxy;
-    private IUnityTimeProxy unityTimeProxy;
+    private readonly IUnityGameObjectProxy unityGameObjectProxy;
 
-    public RemoteMovementController(IUnityGameObjectProxy unityGameObjectProxy, IUnityTimeProxy unityTimeProxy)
+    public RemoteMovementController(IUnityGameObjectProxy unityGameObjectProxy)
     {
         this.unityGameObjectProxy = unityGameObjectProxy;
-        this.unityTimeProxy = unityTimeProxy;
     }
 
     float movementSpeed;
@@ -37,27 +36,38 @@ public class RemoteMovementController : IRemoteMovementController
     }
     public void OnRemotePlayerMovement(SocketIOEvent e)
     {
+        var newPosition = GetPosition(e);
+        var rotation = GetRotation(e);
+
         var playerId = e.GetString(SOCKET_DATA_FIELDS.PlayerId);
         var player = unityGameObjectProxy.Find($"Player:{playerId}");
+        var playerRigidbody = player.GetComponent<Rigidbody>();
+        playerRigidbody.MoveRotation(rotation);
+        playerRigidbody.MovePosition(newPosition);
+    }
 
-        var horizontal = e.GetFloat(SOCKET_DATA_FIELDS.DirectionChange) ?? 0;
-        var vertical = e.GetFloat(SOCKET_DATA_FIELDS.DistanceChange) ?? 0;
+    private static Vector3 GetPosition(SocketIOEvent e)
+    {
+        var aux = e.GetField(SOCKET_DATA_FIELDS.Position);
+        var newPosition = new Vector3();
 
-        if (vertical != 0)
-        {
-            var v = vertical * this.movementSpeed * unityTimeProxy.deltaTime;
-            // rb.AddForce(localPlayer.transform.forward * v, forceMode);
-            // rb.velocity = localPlayer.transform.forward * vertical * force;
-            var rb = player.GetComponent<Rigidbody>();
-            rb.MovePosition(player.transform.position + (player.transform.forward * v));
-        }
+        aux.GetField(ref newPosition.x, SOCKET_DATA_FIELDS.PositionX);
+        aux.GetField(ref newPosition.y, SOCKET_DATA_FIELDS.PositionY);
+        aux.GetField(ref newPosition.z, SOCKET_DATA_FIELDS.PositionZ);
 
-        if (horizontal != 0)
-        {
-            // var h = horizontal * this.rotationSpeed * unityTimeProxy.deltaTime * Mathf.Rad2Deg;
-            // player.transform.Rotate(0, h, 0);
-            var h = horizontal * this.rotationSpeed * unityTimeProxy.deltaTime;
-            player.transform.Rotate(Vector3.up, h);
-        }
+        return newPosition;
+    }
+
+    private static Quaternion GetRotation(SocketIOEvent e)
+    {
+        var aux = e.GetField(SOCKET_DATA_FIELDS.Rotation);
+        var rotation = new Quaternion();
+
+        aux.GetField(ref rotation.x, SOCKET_DATA_FIELDS.RotationX);
+        aux.GetField(ref rotation.y, SOCKET_DATA_FIELDS.RotationY);
+        aux.GetField(ref rotation.z, SOCKET_DATA_FIELDS.RotationZ);
+        aux.GetField(ref rotation.w, SOCKET_DATA_FIELDS.RotationW);
+
+        return rotation;
     }
 }

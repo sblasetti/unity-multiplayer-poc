@@ -23,6 +23,7 @@ namespace Game.Tests.Controllers
 
         private ILocalMovementController controller;
 
+        private Mock<IUnityDebugProxy> unityDebugProxyMock = new Mock<IUnityDebugProxy>();
         private Mock<IUnityInputProxy> unityInputProxyMock = new Mock<IUnityInputProxy>();
         private Mock<IUnityPhysicsProxy> unityPhysicsProxyMock = new Mock<IUnityPhysicsProxy>();
         private Mock<INetworkController> networkControllerMock = new Mock<INetworkController>();
@@ -57,7 +58,8 @@ namespace Game.Tests.Controllers
             rotationCommandMock.Reset();
 
             controller = new LocalMovementController(unityInputProxyMock.Object, networkControllerMock.Object, 
-                rotationCommandMock.Object, movementCommandMock.Object, unityPhysicsProxyMock.Object);
+                rotationCommandMock.Object, movementCommandMock.Object, unityPhysicsProxyMock.Object, 
+                unityDebugProxyMock.Object);
             controller.SetLocalPlayer(fakeLocalPlayer);
             controller.SetSpeed(30F);
             controller.SetRotationSpeed(40F);
@@ -138,7 +140,7 @@ namespace Game.Tests.Controllers
             // Then
             movementCommandMock.Verify(x => x.Execute(It.IsAny<MovementCommandPayload>()), Times.Once);
             rotationCommandMock.Verify(x => x.Execute(It.IsAny<RotationCommandPayload>()), Times.Once);
-            networkControllerMock.Verify(x => x.SendLocalPositionChange(fakeDirection.z, fakeDirection.x), Times.Once);
+            networkControllerMock.Verify(x => x.SendLocalPosition(fakeLocalPlayer), Times.Once);
         }
 
         private void GivenRaycastCollidesWithObject(bool hit = true)

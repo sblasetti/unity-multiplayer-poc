@@ -99,7 +99,7 @@ public class PlayersManagementController : IPlayersManagementController
         var y = e.GetFloat("y").Value;
 
         var position = new Vector3(x, 0.5F, y);
-        this.localPlayer = CreatePlayer("local", position, false);
+        this.localPlayer = CreatePlayer("local", position, Quaternion.identity, false);
 
         this.socket.EmitIfConnected(SOCKET_EVENTS.PlayerJoin, new JSONObject());
     }
@@ -122,17 +122,38 @@ public class PlayersManagementController : IPlayersManagementController
 
     private void AddPlayerFromPayload(JSONObject jobj)
     {
-        var playerId = jobj.GetField(SOCKET_DATA_FIELDS.PlayerId).str;
-        var posObj = jobj.GetField(SOCKET_DATA_FIELDS.Position);
-        var posX = posObj.GetField(SOCKET_DATA_FIELDS.PositionX).f;
-        var posY = posObj.GetField(SOCKET_DATA_FIELDS.PositionY).f;
+        string playerId = null;
+        jobj.GetField(ref playerId, SOCKET_DATA_FIELDS.PlayerId);
+        var position = GetPosition(jobj);
+        var rotation = GetRotation(jobj);
 
-        AddRemotePlayer(playerId, posX, posY);
+        AddRemotePlayer(playerId, position, rotation);
     }
 
-    private GameObject CreatePlayer(string id, Vector3 position, bool isRemote = true)
+    private static Vector3 GetPosition(JSONObject jobj)
     {
-        var gobj = container.InstantiatePrefab(playerPrefab, position, Quaternion.identity, null);
+        float x = 0, y = 0, z = 0;
+        var aux = jobj.GetField(SOCKET_DATA_FIELDS.Position);
+        aux.GetField(ref x, SOCKET_DATA_FIELDS.PositionX);
+        aux.GetField(ref y, SOCKET_DATA_FIELDS.PositionY);
+        aux.GetField(ref z, SOCKET_DATA_FIELDS.PositionZ);
+        return new Vector3(x, y, z);
+    }
+
+    private static Quaternion GetRotation(JSONObject jobj)
+    {
+        float x = 0, y = 0, z = 0, w = 0;
+        var aux = jobj.GetField(SOCKET_DATA_FIELDS.Rotation);
+        aux.GetField(ref x, SOCKET_DATA_FIELDS.RotationX);
+        aux.GetField(ref y, SOCKET_DATA_FIELDS.RotationY);
+        aux.GetField(ref z, SOCKET_DATA_FIELDS.RotationZ);
+        aux.GetField(ref w, SOCKET_DATA_FIELDS.RotationW);
+        return new Quaternion(x, y, z, w);
+    }
+
+    private GameObject CreatePlayer(string id, Vector3 position, Quaternion rotation, bool isRemote = true)
+    {
+        var gobj = container.InstantiatePrefab(playerPrefab, position, rotation, null);
         gobj.name = $"Player:{id}"; // TODO: improve
         if (!isRemote)
         {
@@ -141,10 +162,10 @@ public class PlayersManagementController : IPlayersManagementController
         return gobj;
     }
 
-    private void AddRemotePlayer(string playerId, float posX, float posY)
+    private void AddRemotePlayer(string playerId, Vector3 position, Quaternion rotation)
     {
-        CreatePlayer(playerId, new Vector3(posX, 0, posY));
-        this.state.AddRemotePlayer(playerId, posX,  posY);
+        CreatePlayer(playerId, position, rotation);
+        this.state.AddRemotePlayer(playerId, position.x, position.y, position.z);
     }
 
     private void RemoveRemotePlayer(string playerId)

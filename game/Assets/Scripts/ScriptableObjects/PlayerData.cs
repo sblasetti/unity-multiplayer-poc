@@ -8,4 +8,5 @@ public class PlayerData : ScriptableObject
 
     public float PositionX;
     public float PositionY;
+    public float PositionZ;
 }

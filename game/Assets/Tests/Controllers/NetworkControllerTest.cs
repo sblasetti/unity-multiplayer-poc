@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UnityEngine;
 
 namespace Game.Tests.Controllers
 {
@@ -31,7 +32,7 @@ namespace Game.Tests.Controllers
 
         private void SetupGameEventBuilderMock()
         {
-            gameEventBuilderMock.Setup(x => x.BuildPlayerLocalMove(It.IsAny<float>(), It.IsAny<float>())).Returns(fakeEvent);
+            gameEventBuilderMock.Setup(x => x.BuildPlayerLocalMove(It.IsAny<GameObject>())).Returns(fakeEvent);
         }
 
         private void SetupSocketMock()
@@ -72,16 +73,17 @@ namespace Game.Tests.Controllers
         public void SendLocalPositionChange_ShouldSendEvent(bool hasSocketInstance)
         {
             // Given
+            var fakePlayer = new GameObject();
             var fakeDistanceChange = 0.41F;
             var fakeDirectionChange = -0.22F;
             if (hasSocketInstance) controller.SetSocket(socketMock.Object);
 
             // When
-            controller.SendLocalPositionChange(fakeDistanceChange, fakeDirectionChange);
+            controller.SendLocalPosition(fakePlayer);
 
             // Then
             var times = hasSocketInstance ? Times.Once() : Times.Never();
-            gameEventBuilderMock.Verify(x => x.BuildPlayerLocalMove(fakeDistanceChange, fakeDirectionChange), times);
+            gameEventBuilderMock.Verify(x => x.BuildPlayerLocalMove(fakePlayer), times);
             socketMock.Verify(x => x.Emit(fakeEvent.Name, fakeEvent.Payload), times);
         }
     }

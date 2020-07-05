@@ -28,7 +28,7 @@ namespace Game.Tests.Controllers
                 .WithRigidbody()
                 .Build();
 
-            controller = new RemoteMovementController(unityGameObjectProxyMock.Object, unityTimeProxyMock.Object);
+            controller = new RemoteMovementController(unityGameObjectProxyMock.Object);
             controller.SetState(gameStateMock.Object);
 
             unityGameObjectProxyMock.Setup(x => x.Find(It.IsAny<string>())).Returns(fakePlayerInstance);

@@ -1,13 +1,6 @@
 ﻿using Assets.Scripts.Commands;
 using Assets.Scripts.Proxies;
-using Moq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
-using Zenject;
 
 namespace Assets.Scripts.Controllers
 {
@@ -24,6 +17,7 @@ namespace Assets.Scripts.Controllers
     {
         private readonly IUnityInputProxy unityInputProxy;
         private readonly IUnityPhysicsProxy unityPhysicsProxy;
+        private readonly IUnityDebugProxy unityDebugProxy;
         private readonly INetworkController networkController;
         private readonly IRotationCommand rotationCommand;
         private readonly IMovementCommand movementCommand;
@@ -35,10 +29,12 @@ namespace Assets.Scripts.Controllers
         private float rotationSpeed = 0F;
 
         public LocalMovementController(IUnityInputProxy unityInputProxy, INetworkController networkController, 
-            IRotationCommand rotationCommand, IMovementCommand movementCommand, IUnityPhysicsProxy unityPhysicsProxy)
+            IRotationCommand rotationCommand, IMovementCommand movementCommand, IUnityPhysicsProxy unityPhysicsProxy,
+            IUnityDebugProxy unityDebugProxy)
         {
             this.unityInputProxy = unityInputProxy;
             this.unityPhysicsProxy = unityPhysicsProxy;
+            this.unityDebugProxy = unityDebugProxy;
             this.networkController = networkController;
             this.rotationCommand = rotationCommand;
             this.movementCommand = movementCommand;
@@ -85,7 +81,7 @@ namespace Assets.Scripts.Controllers
             if (horizontal == 0 && vertical == 0)
                 return;
 
-            networkController.SendLocalPositionChange(vertical, horizontal);
+            networkController.SendLocalPosition(localPlayer);
         }
 
         private bool IsGrounded()

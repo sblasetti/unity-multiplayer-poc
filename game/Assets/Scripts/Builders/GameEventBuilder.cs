@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UnityEngine;
 
 namespace Assets.Scripts.Builders
 {
@@ -13,16 +14,18 @@ namespace Assets.Scripts.Builders
 
     public interface IGameEventBuilder
     {
-        GameEvent BuildPlayerLocalMove(float distanceChange, float directionChange);
+        GameEvent BuildPlayerLocalMove(GameObject player);
     }
 
     public class GameEventBuilder : IGameEventBuilder
     {
-        public GameEvent BuildPlayerLocalMove(float distanceChange, float directionChange)
+        public GameEvent BuildPlayerLocalMove(GameObject player)
         {
+            var position = player.transform.position;
+            var rotation = player.transform.rotation;
             var payload = JSONObjectBuilder.Empty()
-                .WithField(SOCKET_DATA_FIELDS.DirectionChange, directionChange)
-                .WithField(SOCKET_DATA_FIELDS.DistanceChange, distanceChange)
+                .WithPositionObject(position.x, position.y, position.z)
+                .WithRotationObject(rotation.x, rotation.y, rotation.z, rotation.w)
                 .WrapAsPayload();
 
             return new GameEvent { 

@@ -11,7 +11,7 @@ namespace Assets.Scripts.Controllers
 {
     public interface INetworkController
     {
-        void SendLocalPositionChange(float distanceChange, float directionChange);
+        void SendLocalPosition(GameObject player);
         void SetSocket(ISocketIOComponent socketIOComponent);
     }
 
@@ -25,11 +25,11 @@ namespace Assets.Scripts.Controllers
             this.eventPayloadBuilder = eventPayloadBuilder;
         }
 
-        public void SendLocalPositionChange(float distanceChange, float directionChange)
+        public void SendLocalPosition(GameObject player)
         {
             if (socket != null)
             {
-                var gameEvent = eventPayloadBuilder.BuildPlayerLocalMove(distanceChange, directionChange);
+                var gameEvent = eventPayloadBuilder.BuildPlayerLocalMove(player);
                 Send(gameEvent);
             }
         }

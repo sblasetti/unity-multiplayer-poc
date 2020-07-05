@@ -1,4 +1,5 @@
 interface PlayerPosition {
-    initialX: number;
-    initialY: number;
+    x: number;
+    y: number;
+    z: number;
 }

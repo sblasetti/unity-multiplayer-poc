@@ -1,21 +1,26 @@
 import { Vector3, Vec2, Euler } from 'three';
 
 interface LogicService {
-    calculateMovement: (player: Player, change: PlayerMovement) => MovementValidationResult;
-    calculateInitialPosition: () => MapCoordinates;
+    isValidMovement: (player: Player, newPosition: PlayerPosition) => boolean;
+    calculateInitialPosition: () => PlayerPosition;
     init: () => void;
     getPlayers: () => Player[];
     getPlayer: (id: string) => Player | undefined;
     addPlayer: (data: Player) => void;
     removePlayer: (id: string) => void;
-    updatePlayerPosition: (id: string, position: MapCoordinates) => void;
+    updatePlayerPosition: (id: string, position: PlayerPosition, rotation: PlayerRotation) => void;
 }
 
 export const logicService = (function logicService(): LogicService {
     let players: Player[] = [];
-    const characterSpecs = {
-        speed: 10,
-        rotationSpeed: 100,
+    const settings = {
+        player: {
+            speed: 10,
+            rotationSpeed: 100,
+        },
+        game: {
+            frameRate: 0.2,
+        },
     };
     const mapDimensions: Vec2 = { x: 20, y: 20 };
 
@@ -40,46 +45,39 @@ export const logicService = (function logicService(): LogicService {
     }
 
     function getPlayer(id: string): Player | undefined {
-        const player = players.find((val) => val.id !== id);
+        const player = players.find((val) => val.id === id);
         return player;
     }
 
-    function calculateInitialPosition(): MapCoordinates {
+    function calculateInitialPosition(): PlayerPosition {
         return {
             x: 0,
-            y: 0,
+            y: 0.5,
             z: 0,
         };
     }
 
-    function calculateMovement(player: Player, change: PlayerMovement): MovementValidationResult {
-        /*
-        How to validate?
-        We need the new position to check if it's valid or not
-        - validate player is still within the limits of the map
-        - validate the distance change is not too high
+    function isValidMovement(player: Player, newPosition: PlayerPosition): boolean {
+        // TODO: validate
 
-        a) if we receive distance & direction changes, we have to calculate rotation (need deltaTime)
-        b) we could receive the change of direction in degrees
-        c) if we receive new position, we need the time of the last change of position
-        */
-        const degreesY = change.horizontal * characterSpecs.rotationSpeed * deltaTime;
-        const euler = new Euler(0, degreesY, 0);
-
-        const {
-            position: { x, y, z },
-        } = player;
-        const initialPosition = new Vector3(x, y, z);
-        initialPosition.applyEuler(euler);
-
-        const newPosition = initialPosition.add();
-
-        return {
-            position: player.position,
-        };
+        return true;
     }
 
-    function updatePlayerPosition(): void {}
+    function updatePlayerPosition(playerId: string, position: PlayerPosition, rotation: PlayerRotation): void {
+        const playerIndex = players.findIndex((x) => x.id === playerId);
+        if (playerIndex < 0) {
+            console.log('ERR: player not found!');
+            return;
+        }
+
+        players = [
+            ...players.slice(0, playerIndex),
+            { ...players[playerIndex], position: { ...position }, rotation: { ...rotation } },
+            ...players.slice(playerIndex + 1),
+        ];
+
+        console.log(JSON.stringify(players));
+    }
 
     return {
         init,
@@ -89,6 +87,6 @@ export const logicService = (function logicService(): LogicService {
         removePlayer,
         updatePlayerPosition,
         calculateInitialPosition,
-        calculateMovement,
+        isValidMovement,
     };
 })();

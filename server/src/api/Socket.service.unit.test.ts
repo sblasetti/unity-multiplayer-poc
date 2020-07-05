@@ -58,7 +58,7 @@ describe('Player Connects - SocketService.OnSocketConnection', () => {
 });
 
 describe('Player Joins The Game - SocketService.OnPlayerJoin', () => {
-    const fakeEventPayload = {};
+    const fakeGameEvent: GameEvent<any> = { payload: {} };
 
     beforeEach(() => {
         resetMocks();
@@ -71,7 +71,7 @@ describe('Player Joins The Game - SocketService.OnPlayerJoin', () => {
         logicService.getPlayers = jest.fn(() => [playerData]);
 
         // When
-        OnPlayerJoin(socketMock, fakeEventPayload);
+        OnPlayerJoin(socketMock, fakeGameEvent);
 
         // Then: do nothing (the player has already joined)
         expect(logicService.addPlayer).toHaveBeenCalledTimes(0);
@@ -86,7 +86,7 @@ describe('Player Joins The Game - SocketService.OnPlayerJoin', () => {
         const playerData: Player = newPlayer(socketMock.id);
 
         // When
-        OnPlayerJoin(socketMock, {});
+        OnPlayerJoin(socketMock, fakeGameEvent);
 
         // Then: store new player
         expect(logicService.addPlayer).toHaveBeenCalledTimes(1);
@@ -102,13 +102,13 @@ describe('Player Joins The Game - SocketService.OnPlayerJoin', () => {
         socketMock.id = 'THIRD_ID';
         const playerData = newPlayer(socketMock.id);
         const existingPlayers: Player[] = [
-            { id: 'FIRST_ID', position: { x: 0, y: 0, z: 0 } },
-            { id: 'SECOND_ID', position: { x: 0, y: 0, z: 0 } },
+            { id: 'FIRST_ID', position: { x: 0, y: 0, z: 0 }, rotation: { x: 0, y: 0, z: 0, w: 0 } },
+            { id: 'SECOND_ID', position: { x: 0, y: 0, z: 0 }, rotation: { x: 0, y: 0, z: 0, w: 0 } },
         ];
         logicService.getPlayers = jest.fn(() => existingPlayers);
 
         // When
-        OnPlayerJoin(socketMock, {});
+        OnPlayerJoin(socketMock, fakeGameEvent);
 
         // Then: store new player
         expect(logicService.addPlayer).toHaveBeenCalledTimes(1);
@@ -129,17 +129,18 @@ describe('Player Joins The Game - SocketService.OnPlayerJoin', () => {
 describe('Player Moves - SocketService.OnPlayerLocalMovement', () => {
     socketMock.id = 'MOCK_ID';
     const fakePlayer: Player = newPlayer(socketMock.id);
-    const fakeMovementResponse: MovementValidationResult = {
+    const fakePayload: PlayerLocalMovementPayload = {
         position: {
-            x: 0.45,
-            y: 0,
-            z: 0.123,
+            x: 0.123,
+            y: 0.5,
+            z: -0.456,
         },
-    };
-    const fakePayload: PlayerId & PlayerMovement = {
-        playerId: 'FAKE_ID',
-        horizontal: 0.123,
-        vertical: -0.456,
+        rotation: {
+            x: 0.333,
+            y: 0.444,
+            z: -0.555,
+            w: 0.666,
+        },
     };
 
     beforeEach(() => {
@@ -160,16 +161,16 @@ describe('Player Moves - SocketService.OnPlayerLocalMovement', () => {
 
     it('On a valid local move, send response, store new position and broadcast position change', () => {
         givenGetPlayerReturns(fakePlayer);
-        givenCalculateMovementReturns(fakeMovementResponse);
+        givenIsValidMovementReturns(true);
 
         // When
-        OnPlayerLocalMovement(socketMock, fakePayload);
+        OnPlayerLocalMovement(socketMock, { payload: fakePayload });
 
-        thenPlayerIsRetrieved(fakePayload);
-        thenPlayerLocalMovementIsValidated(fakePlayer, fakePayload);
-        thenLocalMovementValidationIsSentBack(fakeMovementResponse);
-        thenPlayerPositionIsUpdatedInTheServer(fakePlayer, fakeMovementResponse);
-        thenPlayerPositionIsSentToOtherPlayers(fakePlayer, fakeMovementResponse);
+        thenPlayerIsRetrieved(socketMock);
+        thenPlayerLocalMovementIsValidated(fakePlayer, fakePayload.position);
+        thenLocalMovementValidationIsSentBack(fakePayload.position, fakePayload.rotation);
+        thenPlayerPositionIsUpdatedInTheServer(socketMock, fakePayload.position, fakePayload.rotation);
+        thenPlayerPositionIsSentToOtherPlayers(socketMock, fakePayload.position, fakePayload.rotation);
     });
 
     afterAll(() => {
@@ -209,50 +210,57 @@ function resetMocks() {
     jest.resetAllMocks();
 }
 
-function givenCalculateMovementReturns(fakeMovementResponse: MovementValidationResult) {
-    logicService.calculateMovement = jest.fn(() => fakeMovementResponse);
+function givenIsValidMovementReturns(isValidMovementResponse: boolean) {
+    logicService.isValidMovement = jest.fn(() => isValidMovementResponse);
 }
 
 function givenGetPlayerReturns(fakePlayer: Player) {
     logicService.getPlayer = jest.fn(() => fakePlayer);
 }
 
-function thenPlayerPositionIsSentToOtherPlayers(fakePlayer: Player, fakeMovementResponse: MovementValidationResult) {
+function thenPlayerPositionIsSentToOtherPlayers(
+    socket: SocketIO.Socket,
+    fakePosition: PlayerPosition,
+    fakeRotation: PlayerRotation,
+) {
     expect(socketMock.broadcast.emit).toHaveBeenCalledTimes(1);
     expect(socketMock.broadcast.emit).toHaveBeenCalledWith(
         SOCKET_EVENTS.Player.RemoteMove,
         buildPayload({
-            playerId: fakePlayer.id,
-            position: fakeMovementResponse.position,
+            playerId: socketMock.id,
+            position: fakePosition,
+            rotation: fakeRotation,
         }),
     );
 }
 
-function thenPlayerPositionIsUpdatedInTheServer(fakePlayer: Player, fakeMovementResponse: MovementValidationResult) {
+function thenPlayerPositionIsUpdatedInTheServer(
+    socket: SocketIO.Socket,
+    fakePosition: PlayerPosition,
+    fakeRotation: PlayerRotation,
+) {
     expect(logicService.updatePlayerPosition).toHaveBeenCalledTimes(1);
-    expect(logicService.updatePlayerPosition).toHaveBeenCalledWith(fakePlayer.id, fakeMovementResponse.position);
+    expect(logicService.updatePlayerPosition).toHaveBeenCalledWith(socket.id, fakePosition, fakeRotation);
 }
 
-function thenLocalMovementValidationIsSentBack(fakeMovementResponse: MovementValidationResult) {
+function thenLocalMovementValidationIsSentBack(fakePosition: PlayerPosition, fakeRotation: PlayerRotation) {
     expect(socketMock.emit).toHaveBeenCalledTimes(1);
     expect(socketMock.emit).toHaveBeenCalledWith(
         SOCKET_EVENTS.Server.LocalMoveValidation,
         buildPayload({
             isValid: true,
-            position: fakeMovementResponse.position,
+            position: fakePosition,
+            rotation: fakeRotation,
         }),
     );
 }
 
-function thenPlayerLocalMovementIsValidated(fakePlayer: Player, fakePayload: PlayerId & PlayerMovement) {
-    expect(logicService.calculateMovement).toHaveBeenCalledTimes(1);
-    expect(logicService.calculateMovement).toHaveBeenCalledWith(fakePlayer, {
-        horizontal: fakePayload.horizontal,
-        vertical: fakePayload.vertical,
-    });
+function thenPlayerLocalMovementIsValidated(fakePlayer: Player, fakePosition: PlayerPosition) {
+    expect(logicService.isValidMovement).toHaveBeenCalledTimes(1);
+    expect(logicService.isValidMovement).toHaveBeenCalledWith(fakePlayer, fakePosition);
 }
 
-function thenPlayerIsRetrieved(fakePayload: PlayerId & PlayerMovement) {
+function thenPlayerIsRetrieved(socket: SocketIO.Socket) {
     expect(logicService.getPlayer).toHaveBeenCalledTimes(1);
-    expect(logicService.getPlayer).toHaveBeenCalledWith(fakePayload.playerId);
+    expect(logicService.getPlayer).toHaveBeenCalledWith(socket.id);
 }

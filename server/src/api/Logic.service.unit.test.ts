@@ -1,8 +1,9 @@
 import { logicService } from './Logic.service';
 
 describe('LogicService', () => {
-    const fakePlayer = { id: 'SOME_ID', position: { x: 1, y: 2, z: 3 } };
-    const zeroPosition = { x: 0, y: 0, z: 0 };
+    const fakePlayer = { id: 'SOME_ID', position: { x: 1, y: 2, z: 3 }, rotation: { x: 4, y: 5, z: 6, w: 7 } };
+    const zeroPosition: PlayerPosition = { x: 0, y: 0, z: 0 };
+    const zeroRotation: PlayerRotation = { x: 0, y: 0, z: 0, w: 0 };
 
     beforeEach(() => {
         logicService.init();
@@ -20,7 +21,7 @@ describe('LogicService', () => {
         givenPlayerAlreadyInTheServer(fakePlayer);
 
         const whenAddingAnotherPlayerWithTheSameId = () => {
-            const anotherPlayer = { id: 'SOME_ID', position: zeroPosition };
+            const anotherPlayer = { id: 'SOME_ID', position: zeroPosition, rotation: zeroRotation };
             logicService.addPlayer(anotherPlayer);
         };
 
@@ -28,7 +29,7 @@ describe('LogicService', () => {
     });
 
     it('Delete a player', () => {
-        givenThreePlayersInTheServer(zeroPosition);
+        givenThreePlayersInTheServer(zeroPosition, zeroRotation);
 
         whenRemovingPlayer2();
 
@@ -37,16 +38,17 @@ describe('LogicService', () => {
 
     it('Valid local movement', () => {
         // Given
-        const fakeMovement: PlayerMovement = {
-            horizontal: 0.98,
-            vertical: 0.2,
+        const fakePosition: PlayerPosition = {
+            x: 0.2,
+            y: 0.5,
+            z: -2.3,
         };
 
         // When
-        const result = logicService.calculateMovement(fakePlayer, fakeMovement);
+        const result = logicService.isValidMovement(fakePlayer, fakePosition);
 
         // Then
-        expect(result.position).toBe({});
+        expect(result).toBeFalsy();
     });
 });
 
@@ -60,10 +62,10 @@ function whenRemovingPlayer2() {
     logicService.removePlayer('P2');
 }
 
-function givenThreePlayersInTheServer(zeroPosition: { x: number; y: number; z: number }) {
-    logicService.addPlayer({ id: 'P1', position: zeroPosition });
-    logicService.addPlayer({ id: 'P2', position: zeroPosition });
-    logicService.addPlayer({ id: 'P3', position: zeroPosition });
+function givenThreePlayersInTheServer(position: PlayerPosition, rotation: PlayerRotation) {
+    logicService.addPlayer({ id: 'P1', position, rotation });
+    logicService.addPlayer({ id: 'P2', position, rotation });
+    logicService.addPlayer({ id: 'P3', position, rotation });
     expect(logicService.getPlayers()).toHaveLength(3);
 }
 
@@ -71,7 +73,7 @@ function thenThrowDuplicatePlayerError(whenAddingAnotherPlayerWithTheSameId: () 
     expect(whenAddingAnotherPlayerWithTheSameId).toThrowError("Player 'SOME_ID' already exists.");
 }
 
-function givenPlayerAlreadyInTheServer(playerData: { id: string; position: { x: number; y: number; z: number } }) {
+function givenPlayerAlreadyInTheServer(playerData: Player) {
     logicService.addPlayer(playerData);
     expect(logicService.getPlayers()).toContainEqual(playerData);
 }
@@ -80,7 +82,7 @@ function thenPlayerIsAddedToTheServer(playerData: { id: string; position: { x: n
     expect(logicService.getPlayers()).toContainEqual(playerData);
 }
 
-function whenAddingThePlayer(playerData: { id: string; position: { x: number; y: number; z: number } }) {
+function whenAddingThePlayer(playerData: Player) {
     logicService.addPlayer(playerData);
 }
 

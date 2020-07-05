@@ -19,6 +19,12 @@ public static class SOCKET_DATA_FIELDS
     public static string Position = "position";
     public static string PositionX = "x";
     public static string PositionY = "y";
+    public static string PositionZ = "z";
+    public static string Rotation = "rotation";
+    public static string RotationX = "x";
+    public static string RotationY = "y";
+    public static string RotationZ = "z";
+    public static string RotationW = "w";
 }
 
 public static class INPUT_NAMES

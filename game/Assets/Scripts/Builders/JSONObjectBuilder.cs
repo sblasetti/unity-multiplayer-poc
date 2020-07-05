@@ -66,17 +66,30 @@ namespace Assets.Scripts.Builders
             return this;
         }
 
-        internal JSONObjectBuilder WithPositionObject(float x, float y)
+        internal JSONObjectBuilder WithPositionObject(float x, float y, float z)
         {
-            var posObj = Empty().WithPosition(x, y).Build();
+            var posObj = Empty().WithPosition(x, y, z).Build();
             this.obj.AddField(SOCKET_DATA_FIELDS.Position, posObj);
             return this;
         }
 
-        internal JSONObjectBuilder WithPosition(float x, float y)
+        internal JSONObjectBuilder WithRotationObject(float x, float y, float z, float w)
+        {
+            var posObj = Empty()
+                .WithField(SOCKET_DATA_FIELDS.RotationX, x)
+                .WithField(SOCKET_DATA_FIELDS.RotationY, y)
+                .WithField(SOCKET_DATA_FIELDS.RotationZ, z)
+                .WithField(SOCKET_DATA_FIELDS.RotationW, w)
+                .Build();
+            this.obj.AddField(SOCKET_DATA_FIELDS.Rotation, posObj);
+            return this;
+        }
+
+        internal JSONObjectBuilder WithPosition(float x, float y, float z)
         {
             this.obj.AddField(SOCKET_DATA_FIELDS.PositionX, x);
             this.obj.AddField(SOCKET_DATA_FIELDS.PositionY, y);
+            this.obj.AddField(SOCKET_DATA_FIELDS.PositionZ, z);
             return this;
         }
     }

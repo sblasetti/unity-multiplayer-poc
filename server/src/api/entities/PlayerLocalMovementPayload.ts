@@ -1,5 +1,4 @@
-interface Player {
-    id: string;
+interface PlayerLocalMovementPayload {
     position: PlayerPosition;
     rotation: PlayerRotation;
 }
