@@ -21,7 +21,7 @@
         "express": "^4.17.1",
         "jest": "^25.5.4",
         "nodemon": "^2.0.3",
-        "socket.io": "^2.3.0",
+        "socket.io": "^2.5.0",
         "three": "^0.118.3"
     },
     "devDependencies": {
